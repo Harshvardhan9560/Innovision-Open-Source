@@ -178,6 +178,12 @@ const Navbar = () => {
                       </Link>
                     </li>
                   </ul>
+
+                  {/* Google Translate */}
+                  <div className="mt-4 ml-4 pt-4">
+                    <p className="text-sm text-gray-600 mb-2">Translate:</p>
+                    <GoogleTranslate />
+                  </div>
                 </nav>
               ) : (
                 <nav>
