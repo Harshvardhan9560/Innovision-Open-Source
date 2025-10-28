@@ -17,7 +17,7 @@ const Page = async () => {
         style={{ padding: "56.25% 0 0 0", position: "relative" }}
       >
         <iframe
-          // src="https://player.vimeo.com/video/1072424992?h=7c69c51efa&badge=0&autopause=0&player_id=0&app_id=58479"
+          src="https://www.dailymotion.com/embed/video/x9ste7y"
           frameBorder="0"
           allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
           style={{
