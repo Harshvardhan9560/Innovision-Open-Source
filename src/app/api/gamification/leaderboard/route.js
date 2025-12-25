@@ -1,10 +1,50 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
-import { collection, query, orderBy, limit, getDocs, where } from "firebase/firestore";
+import { collection, query, orderBy, limit, getDocs, doc, getDoc } from "firebase/firestore";
 
 export async function GET(request) {
   try {
     const gamificationRef = collection(db, "gamification");
+    
+    // Helper function to enrich user data
+    const enrichUserData = async (gamificationDocs) => {
+      const enrichedUsers = await Promise.all(
+        gamificationDocs.map(async (gamDoc) => {
+          const userId = gamDoc.id;
+          const gamData = gamDoc.data();
+          
+          // Fetch user profile data
+          const userDocRef = doc(db, "users", userId);
+          const userDoc = await getDoc(userDocRef);
+          
+          let userData = {
+            name: userId.split('@')[0], // fallback to email username
+            avatar: null,
+            coursesCompleted: 0
+          };
+          
+          if (userDoc.exists()) {
+            const profile = userDoc.data();
+            userData = {
+              name: profile.name || profile.displayName || userData.name,
+              avatar: profile.photoURL || profile.image || null,
+              coursesCompleted: profile.coursesCompleted || 0
+            };
+          }
+          
+          return {
+            id: userId,
+            ...userData,
+            xp: gamData.xp || 0,
+            level: gamData.level || 1,
+            streak: gamData.streak || 0,
+            lastActive: gamData.lastActive
+          };
+        })
+      );
+      
+      return enrichedUsers;
+    };
     
     // Get all-time leaderboard
     const allTimeQuery = query(
@@ -13,44 +53,27 @@ export async function GET(request) {
       limit(50)
     );
     const allTimeSnapshot = await getDocs(allTimeQuery);
-    const allTime = allTimeSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const allTime = await enrichUserData(allTimeSnapshot.docs);
 
-    // Get weekly leaderboard (users active in last 7 days)
+    // Get weekly leaderboard (filter from all-time, users active in last 7 days)
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
+    const weekAgoISO = weekAgo.toISOString();
     
-    const weeklyQuery = query(
-      gamificationRef,
-      where("lastActive", ">=", weekAgo.toISOString()),
-      orderBy("lastActive", "desc"),
-      orderBy("xp", "desc"),
-      limit(50)
-    );
-    const weeklySnapshot = await getDocs(weeklyQuery);
-    const weekly = weeklySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const weekly = allTime
+      .filter(user => user.lastActive && user.lastActive >= weekAgoISO)
+      .sort((a, b) => b.xp - a.xp)
+      .slice(0, 50);
 
-    // Get daily leaderboard (users active today)
+    // Get daily leaderboard (filter from all-time, users active today)
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const todayISO = today.toISOString();
     
-    const dailyQuery = query(
-      gamificationRef,
-      where("lastActive", ">=", today.toISOString()),
-      orderBy("lastActive", "desc"),
-      orderBy("xp", "desc"),
-      limit(50)
-    );
-    const dailySnapshot = await getDocs(dailyQuery);
-    const daily = dailySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const daily = allTime
+      .filter(user => user.lastActive && user.lastActive >= todayISO)
+      .sort((a, b) => b.xp - a.xp)
+      .slice(0, 50);
 
     return NextResponse.json({
       daily,
@@ -58,9 +81,8 @@ export async function GET(request) {
       allTime
     });
   } catch (error) {
-    console.error("Error fetching leaderboard:", error);
     return NextResponse.json(
-      { error: "Failed to fetch leaderboard" },
+      { error: "Failed to fetch leaderboard", details: error.message },
       { status: 500 }
     );
   }

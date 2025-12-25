@@ -26,6 +26,10 @@ export default function StreakCalendar({ userId }) {
   useEffect(() => {
     if (userId) {
       fetchActivityData();
+      
+      // Refresh activity calendar every 15 seconds for real-time updates
+      const interval = setInterval(fetchActivityData, 15000);
+      return () => clearInterval(interval);
     }
   }, [userId]);
 
@@ -54,12 +58,6 @@ export default function StreakCalendar({ userId }) {
   const getDayLabel = (dayIndex) => {
     const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
     return days[dayIndex];
-  };
-
-  const getMonthLabel = (weekIndex) => {
-    const date = new Date(today);
-    date.setDate(date.getDate() - (weekIndex * 7));
-    return date.toLocaleDateString('en-US', { month: 'short' });
   };
 
   // Calculate total activities

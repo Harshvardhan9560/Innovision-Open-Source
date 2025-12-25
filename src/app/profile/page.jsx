@@ -1,109 +1,325 @@
 "use client";
 
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Trophy, TrendingUp, BookOpen, Calendar } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Sidebar from "@/components/dashboard/Sidebar";
 import { ProblemSolvedChart } from "@/components/ui/problem-sloved-chart";
 import { RecentCourses } from "@/components/ui/recent-submissions";
-import { useState, useEffect } from "react";
-import Sidebar from "@/components/dashboard/Sidebar";
+import GamificationDashboard from "@/components/gamification/GamificationDashboard";
+import XPChart from "@/components/gamification/XPChart";
+import StreakCalendar from "@/components/gamification/StreakCalendar";
+import DailyChallenges from "@/components/gamification/DailyChallenges";
+import SkillTree from "@/components/gamification/SkillTree";
+import Leaderboard from "@/components/gamification/Leaderboard";
+import { Download, Database, Shield, FileText } from "lucide-react";
 
-export default function Page() {
+export default function ProfilePage() {
+    const { data: session } = useSession();
     const [userData, setUserData] = useState({});
-    const [recentRoadmaps, setRecentRoamdaps] = useState([]);
-    const [completedRoadmaps, setcompletedRoadmaps] = useState([]);
-    const [rank, setRank] = useState(0)
-    const [loading, setLoading] = useState(false)
-    const [difficultyLevel, setDifficultyLevel] = useState([])
-    const [leaderboard, setLeaderboard] = useState([])
+    const [recentRoadmaps, setRecentRoadmaps] = useState([]);
+    const [completedRoadmaps, setCompletedRoadmaps] = useState([]);
+    const [rank, setRank] = useState(0);
+    const [loading, setLoading] = useState(false);
+    const [difficultyLevel, setDifficultyLevel] = useState([]);
+    const [leaderboard, setLeaderboard] = useState([]);
+    const [exporting, setExporting] = useState(false);
 
     useEffect(() => {
-        async function fetchUser() {
-            const res = await fetch("/api/getuser");
-            const data = await res.json();
-            if (res.ok) {
-                setUserData(data);
-            }
-        }
-
-        async function fetchRoadmaps() {
-            setLoading(true)
-            const res = await fetch("/api/roadmap/all");
-            const data = await res.json();
-            const diffLevel = data.difficultyArray
-            let docs = data.docs.length > 4 ? data.docs.slice(0, 4) : data.docs;
-            docs = docs.filter((e) => e.process === 'completed');
-            const completed =
-                data.docs.filter((roadmap) => roadmap.completed) || [];
-            setcompletedRoadmaps(completed);
-            setDifficultyLevel(diffLevel)
-            setRecentRoamdaps(docs);
-            console.log(docs)
-            setLoading(false)
-        }
-
-        async function fetchRank() {
-            const res = await fetch("/api/getrank");
-            const data = await res.json();
-            setRank(data.rank)
-            setLeaderboard(data.leaderboard)
-        }
-
         fetchUser();
         fetchRank();
         fetchRoadmaps();
     }, []);
 
-    return (
-        <div className="flex min-h-screen max-w-6xl pt-4 mx-auto flex-col">
-            <main className="flex-1">
-                <div className="container mx-auto max-md:pb-6 md:py-6">
-                    <div className="grid gap-6 mx-4 relative md:grid-cols-[1fr_3fr]">
-                        <Sidebar user={userData} rank={rank} leaderboard={leaderboard} difficultyLevel= {difficultyLevel} />
+    async function fetchUser() {
+        const res = await fetch("/api/getuser");
+        const data = await res.json();
+        if (res.ok) {
+            setUserData(data);
+        }
+    }
 
-                        <div className="space-y-6 pt-3">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Xp earned</CardTitle>
-                                    <CardDescription>
-                                        your xp earned data over the last year
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <ProblemSolvedChart
-                                        questions={Object.values(
-                                            userData?.xptrack || {}
-                                        )}
-                                    />
-                                </CardContent>
-                            </Card>
-                            <Card className={"border-0 shadow-none p-0"}>
-                                <CardHeader>
-                                    <CardTitle>Recent Courses</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <RecentCourses courses={recentRoadmaps} loading={loading}/>
-                                </CardContent>
-                            </Card>
-                            <Card className={"border-0 shadow-none p-0"}>
-                                <CardHeader>
-                                    <CardTitle>Completed Courses</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <RecentCourses
-                                        courses={completedRoadmaps}
-                                        loading={loading}
-                                    />
-                                </CardContent>
-                            </Card>
-                        </div>
+    const handleUserUpdate = (updatedUser) => {
+        setUserData(updatedUser);
+    };
+
+    const exportDataset = async (type) => {
+        setExporting(true);
+        try {
+            const response = await fetch(`/api/research/export?type=${type}`);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${type}_dataset_${Date.now()}.json`;
+            a.click();
+        } catch (error) {
+            console.error("Failed to export dataset:", error);
+        }
+        setExporting(false);
+    };
+
+    async function fetchRoadmaps() {
+        setLoading(true);
+        const res = await fetch("/api/roadmap/all");
+        const data = await res.json();
+        const diffLevel = data.difficultyArray;
+        let docs = data.docs.length > 4 ? data.docs.slice(0, 4) : data.docs;
+        docs = docs.filter((e) => e.process === 'completed');
+        const completed = data.docs.filter((roadmap) => roadmap.completed) || [];
+        setCompletedRoadmaps(completed);
+        setDifficultyLevel(diffLevel);
+        setRecentRoadmaps(docs);
+        setLoading(false);
+    }
+
+    async function fetchRank() {
+        const res = await fetch("/api/getrank");
+        const data = await res.json();
+        setRank(data.rank);
+        setLeaderboard(data.leaderboard);
+    }
+
+    if (!session) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <p className="text-muted-foreground">Please login to view your profile</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-background">
+            <div className="max-w-7xl mx-auto p-6">
+                <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
+                    {/* Left Sidebar - All original features */}
+                    <Sidebar 
+                        user={userData} 
+                        rank={rank} 
+                        leaderboard={leaderboard} 
+                        difficultyLevel={difficultyLevel}
+                        onUserUpdate={handleUserUpdate}
+                    />
+
+                    {/* Main Content - All original tabs */}
+                    <div className="space-y-6">
+                        <Tabs defaultValue="overview" className="space-y-4">
+                            <TabsList className="grid w-full grid-cols-6">
+                                <TabsTrigger value="overview">
+                                    <Trophy className="h-4 w-4 mr-2" />
+                                    Overview
+                                </TabsTrigger>
+                                <TabsTrigger value="progress">
+                                    <TrendingUp className="h-4 w-4 mr-2" />
+                                    Progress
+                                </TabsTrigger>
+                                <TabsTrigger value="courses">
+                                    <BookOpen className="h-4 w-4 mr-2" />
+                                    Courses
+                                </TabsTrigger>
+                                <TabsTrigger value="activity">
+                                    <Calendar className="h-4 w-4 mr-2" />
+                                    Activity
+                                </TabsTrigger>
+                                <TabsTrigger value="compete">
+                                    <Trophy className="h-4 w-4 mr-2" />
+                                    Compete
+                                </TabsTrigger>
+                                <TabsTrigger value="research">
+                                    <Database className="h-4 w-4 mr-2" />
+                                    Research
+                                </TabsTrigger>
+                            </TabsList>
+
+                            {/* Overview Tab - Gamification Dashboard */}
+                            <TabsContent value="overview" className="space-y-4">
+                                {session?.user?.email && (
+                                    <GamificationDashboard userId={session.user.email} />
+                                )}
+                            </TabsContent>
+
+                            {/* Progress Tab - XP Chart */}
+                            <TabsContent value="progress" className="space-y-4">
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>XP Earned</CardTitle>
+                                        <CardDescription>
+                                            Your XP earned data over the last year
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <ProblemSolvedChart
+                                            questions={Object.values(userData?.xptrack || {})}
+                                        />
+                                    </CardContent>
+                                </Card>
+
+                                {session?.user?.email && (
+                                    <XPChart userId={session.user.email} />
+                                )}
+                            </TabsContent>
+
+                            {/* Courses Tab */}
+                            <TabsContent value="courses" className="space-y-4">
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Recent Courses</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <RecentCourses courses={recentRoadmaps} loading={loading} />
+                                    </CardContent>
+                                </Card>
+                                
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Completed Courses</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <RecentCourses courses={completedRoadmaps} loading={loading} />
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+
+                            {/* Activity Tab - Streak Calendar */}
+                            <TabsContent value="activity" className="space-y-4">
+                                {session?.user?.email && (
+                                    <StreakCalendar userId={session.user.email} />
+                                )}
+                            </TabsContent>
+
+                            {/* Compete Tab - Challenges, Skills, Leaderboard */}
+                            <TabsContent value="compete" className="space-y-4">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                    {/* Daily Challenges */}
+                                    {session?.user?.email && (
+                                        <DailyChallenges userId={session.user.email} />
+                                    )}
+                                    
+                                    {/* Skill Tree */}
+                                    <SkillTree />
+                                </div>
+
+                                {/* Leaderboard */}
+                                {session?.user?.email && (
+                                    <Leaderboard currentUserId={session.user.email} />
+                                )}
+                            </TabsContent>
+
+                            {/* Research Tab - Data Export */}
+                            <TabsContent value="research" className="space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* Interaction Dataset */}
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle className="flex items-center gap-2">
+                                                <Database className="h-5 w-5 text-blue-500" />
+                                                Interaction Dataset
+                                            </CardTitle>
+                                            <CardDescription>
+                                                Anonymized user interaction data including clicks, time spent, and navigation patterns
+                                            </CardDescription>
+                                        </CardHeader>
+                                        <CardContent className="space-y-4">
+                                            <div className="space-y-2 text-sm">
+                                                <div className="flex items-center gap-2">
+                                                    <Shield className="h-4 w-4 text-green-500" />
+                                                    <span>Fully anonymized</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <FileText className="h-4 w-4" />
+                                                    <span>JSON format</span>
+                                                </div>
+                                            </div>
+                                            <Button 
+                                                onClick={() => exportDataset('interactions')}
+                                                disabled={exporting}
+                                                className="w-full"
+                                            >
+                                                <Download className="h-4 w-4 mr-2" />
+                                                Export Interactions
+                                            </Button>
+                                        </CardContent>
+                                    </Card>
+
+                                    {/* Outcome Dataset */}
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle className="flex items-center gap-2">
+                                                <TrendingUp className="h-5 w-5 text-green-500" />
+                                                Outcome Dataset
+                                            </CardTitle>
+                                            <CardDescription>
+                                                Learning outcomes, quiz scores, completion rates, and performance metrics
+                                            </CardDescription>
+                                        </CardHeader>
+                                        <CardContent className="space-y-4">
+                                            <div className="space-y-2 text-sm">
+                                                <div className="flex items-center gap-2">
+                                                    <Shield className="h-4 w-4 text-green-500" />
+                                                    <span>Fully anonymized</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <FileText className="h-4 w-4" />
+                                                    <span>JSON format</span>
+                                                </div>
+                                            </div>
+                                            <Button 
+                                                onClick={() => exportDataset('outcomes')}
+                                                disabled={exporting}
+                                                className="w-full"
+                                            >
+                                                <Download className="h-4 w-4 mr-2" />
+                                                Export Outcomes
+                                            </Button>
+                                        </CardContent>
+                                    </Card>
+                                </div>
+
+                                {/* Privacy Notice */}
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="flex items-center gap-2">
+                                            <Shield className="h-5 w-5 text-green-500" />
+                                            Data Privacy & Anonymization
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <ul className="space-y-2 text-sm">
+                                            <li className="flex items-center gap-2">
+                                                <Shield className="h-4 w-4 text-green-500" />
+                                                All personal identifiers removed
+                                            </li>
+                                            <li className="flex items-center gap-2">
+                                                <Shield className="h-4 w-4 text-green-500" />
+                                                User IDs replaced with random hashes
+                                            </li>
+                                            <li className="flex items-center gap-2">
+                                                <Shield className="h-4 w-4 text-green-500" />
+                                                No email addresses or names included
+                                            </li>
+                                            <li className="flex items-center gap-2">
+                                                <Shield className="h-4 w-4 text-green-500" />
+                                                Timestamps rounded to nearest hour
+                                            </li>
+                                            <li className="flex items-center gap-2">
+                                                <Shield className="h-4 w-4 text-green-500" />
+                                                IP addresses excluded
+                                            </li>
+                                            <li className="flex items-center gap-2">
+                                                <Shield className="h-4 w-4 text-green-500" />
+                                                GDPR and COPPA compliant
+                                            </li>
+                                        </ul>
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+                        </Tabs>
                     </div>
                 </div>
-            </main>
+            </div>
         </div>
     );
 }

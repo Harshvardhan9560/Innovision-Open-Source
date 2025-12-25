@@ -10,6 +10,10 @@ export default function XPChart({ userId }) {
   useEffect(() => {
     if (userId) {
       fetchXPData();
+      
+      // Refresh XP chart every 10 seconds for real-time updates
+      const interval = setInterval(fetchXPData, 10000);
+      return () => clearInterval(interval);
     }
   }, [userId]);
 

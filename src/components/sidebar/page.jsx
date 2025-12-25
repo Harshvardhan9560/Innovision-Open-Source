@@ -6,7 +6,7 @@ import { Skeleton } from "../ui/skeleton";
 import { ChevronDown, ChevronUp, ChevronRight, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export default function Sidebar({ roadmap, id }) {
+export default function Sidebar({ roadmap, id, isStudioCourse, courseId }) {
     const [isOverviewVisible, setIsOverviewVisible] = useState(true);
     const [expandedChapters, setExpandedChapters] = useState({});
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -26,9 +26,14 @@ export default function Sidebar({ roadmap, id }) {
     const navigateToSubtopic = (chapterIndex, subtopicIndex) => {
         setActiveChapter(chapterIndex);
         setActiveSubtopic(subtopicIndex);
-        router.push(
-            `/chapter-test/${id}/${chapterIndex + 1}?subtopic=${subtopicIndex}`
-        );
+        
+        if (isStudioCourse) {
+            router.push(`/studio-course/${courseId}/${chapterIndex + 1}`);
+        } else {
+            router.push(
+                `/chapter-test/${id}/${chapterIndex + 1}?subtopic=${subtopicIndex}`
+            );
+        }
 
         if (window.innerWidth < 1024) {
             setIsMobileSidebarOpen(false);
@@ -152,7 +157,7 @@ export default function Sidebar({ roadmap, id }) {
                                         )}
                                     </button>
 
-                                    {expandedChapters[chapterIndex] && (
+                                    {expandedChapters[chapterIndex] && chapter.contentOutline && (
                                         <div className="pl-4 py-2 bg-zinc-50 dark:bg-zinc-900/80 rounded-b-lg">
                                             {chapter.contentOutline.map(
                                                 (content, subtopicIndex) => {

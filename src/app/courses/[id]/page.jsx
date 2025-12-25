@@ -1,17 +1,19 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useSession } from "next-auth/react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, ChevronLeft, ChevronRight, Home } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { BookOpen, Clock, User, ArrowLeft, Play } from "lucide-react";
 import { toast } from "sonner";
 
-export default function CourseViewPage() {
+export default function CourseDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { data: session } = useSession();
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [currentChapterIndex, setCurrentChapterIndex] = useState(0);
 
   useEffect(() => {
     if (params.id) {
@@ -25,39 +27,32 @@ export default function CourseViewPage() {
       const res = await fetch(`/api/courses/${params.id}`);
       if (res.ok) {
         const data = await res.json();
-        setCourse(data.course);
+        setCourse(data);
       } else {
         toast.error("Course not found");
         router.push("/courses");
       }
     } catch (error) {
-      console.error("Failed to fetch course:", error);
       toast.error("Failed to load course");
     }
     setLoading(false);
   };
 
-  const currentChapter = course?.chapters?.[currentChapterIndex];
-
-  const goToNextChapter = () => {
-    if (currentChapterIndex < course.chapters.length - 1) {
-      setCurrentChapterIndex(currentChapterIndex + 1);
+  const handleEnroll = async () => {
+    if (!session) {
+      toast.error("Please login to enroll");
+      router.push("/login");
+      return;
     }
-  };
 
-  const goToPreviousChapter = () => {
-    if (currentChapterIndex > 0) {
-      setCurrentChapterIndex(currentChapterIndex - 1);
-    }
+    // For Studio courses, just navigate directly to first chapter
+    router.push(`/studio-course/${params.id}/1`);
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="text-sm text-muted-foreground mt-4">Loading course...</p>
-        </div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
       </div>
     );
   }
@@ -66,7 +61,6 @@ export default function CourseViewPage() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <BookOpen className="h-16 w-16 mx-auto mb-4 opacity-50" />
           <p className="text-lg text-muted-foreground">Course not found</p>
           <Button onClick={() => router.push("/courses")} className="mt-4">
             Back to Courses
@@ -78,117 +72,107 @@ export default function CourseViewPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-card border-b sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push("/courses")}
-              >
-                <Home className="h-4 w-4 mr-2" />
-                All Courses
-              </Button>
-              <div>
-                <h1 className="text-xl font-bold">{course.title}</h1>
-                <p className="text-sm text-muted-foreground">
-                  Chapter {currentChapterIndex + 1} of {course.chapters?.length || 0}
-                </p>
-              </div>
+      <div className="max-w-5xl mx-auto p-6">
+        {/* Back Button */}
+        <Button
+          variant="ghost"
+          onClick={() => router.push("/courses")}
+          className="mb-6"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Courses
+        </Button>
+
+        {/* Course Header */}
+        <div className="mb-8">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex-1">
+              <h1 className="text-4xl font-bold mb-2">{course.title}</h1>
+              <p className="text-lg text-muted-foreground">{course.description}</p>
+            </div>
+            <Badge className="ml-4">Published</Badge>
+          </div>
+
+          <div className="flex items-center gap-6 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              <span>By {course.createdBy || "Instructor"}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4" />
+              <span>{course.chapters?.length || 0} chapters</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              <span>Published {new Date(course.publishedAt).toLocaleDateString()}</span>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Sidebar - Chapter List */}
-          <div className="lg:col-span-1">
-            <Card className="sticky top-24">
-              <CardHeader>
-                <CardTitle className="text-lg">Chapters</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {course.chapters?.map((chapter, idx) => (
-                    <button
-                      key={chapter.id}
-                      onClick={() => setCurrentChapterIndex(idx)}
-                      className={`w-full text-left p-3 rounded-lg border transition-all ${
-                        idx === currentChapterIndex
-                          ? "border-blue-400 bg-blue-50 font-medium"
-                          : "hover:bg-accent"
-                      }`}
-                    >
-                      <div className="text-sm">
-                        Chapter {idx + 1}
-                      </div>
-                      <div className="text-xs text-muted-foreground line-clamp-1">
-                        {chapter.title}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        {/* Enroll Button */}
+        <Card className="mb-8">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold mb-1">Ready to start learning?</h3>
+                <p className="text-sm text-muted-foreground">
+                  Start the course and access all materials
+                </p>
+              </div>
+              <Button
+                size="lg"
+                onClick={handleEnroll}
+                className="ml-4"
+              >
+                <Play className="h-4 w-4 mr-2" />
+                Start Course
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Main Content */}
-          <div className="lg:col-span-3">
+        {/* Course Content */}
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold">Course Content</h2>
+          
+          {course.chapters && course.chapters.length > 0 ? (
+            <div className="space-y-3">
+              {course.chapters.map((chapter, index) => (
+                <Card key={index}>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 text-sm font-bold">
+                        {index + 1}
+                      </span>
+                      {chapter.title || `Chapter ${index + 1}`}
+                    </CardTitle>
+                    {chapter.description && (
+                      <CardDescription>{chapter.description}</CardDescription>
+                    )}
+                  </CardHeader>
+                  {chapter.topics && chapter.topics.length > 0 && (
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {chapter.topics.map((topic, topicIndex) => (
+                          <li key={topicIndex} className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                            {topic}
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  )}
+                </Card>
+              ))}
+            </div>
+          ) : (
             <Card>
-              <CardHeader>
-                <CardTitle>{currentChapter?.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div 
-                  className="prose max-w-none"
-                  dangerouslySetInnerHTML={{ __html: currentChapter?.content || "<p>No content available</p>" }}
-                />
-
-                {/* Resources */}
-                {currentChapter?.resources && currentChapter.resources.length > 0 && (
-                  <div className="mt-8 pt-8 border-t">
-                    <h3 className="text-lg font-semibold mb-4">Resources</h3>
-                    <div className="space-y-2">
-                      {currentChapter.resources.map((resource, idx) => (
-                        <a
-                          key={idx}
-                          href={resource.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block p-3 border rounded-lg hover:bg-accent transition-all"
-                        >
-                          <div className="font-medium">{resource.title}</div>
-                          <div className="text-sm text-muted-foreground">{resource.type}</div>
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Navigation */}
-                <div className="flex items-center justify-between mt-8 pt-8 border-t">
-                  <Button
-                    variant="outline"
-                    onClick={goToPreviousChapter}
-                    disabled={currentChapterIndex === 0}
-                  >
-                    <ChevronLeft className="h-4 w-4 mr-2" />
-                    Previous
-                  </Button>
-                  <Button
-                    onClick={goToNextChapter}
-                    disabled={currentChapterIndex === course.chapters.length - 1}
-                  >
-                    Next
-                    <ChevronRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </div>
+              <CardContent className="py-8 text-center text-muted-foreground">
+                <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>Course content will be available after enrollment</p>
               </CardContent>
             </Card>
-          </div>
+          )}
         </div>
       </div>
     </div>

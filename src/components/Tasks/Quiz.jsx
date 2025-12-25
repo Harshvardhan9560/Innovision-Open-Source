@@ -21,14 +21,14 @@ export default function Quiz({ task, roadmapId, chapterNumber }) {
     const [isAnswered, setIsAnswered] = useState(false);
     const [isCorrect, setIsCorrect] = useState(false);
     const [submitting, setSubmitting] = useState(false);
-    const {getXp} = useContext(xpContext)
+    const { getXp, awardXP } = useContext(xpContext);
     const handleOptionSelect = (value) => {
         if (isAnswered) return;
         setSelectedOption(value);
     };
 
     const checkAnswer = async () => {
-        setSubmitting(true)
+        setSubmitting(true);
         const isCorrect = selectedOption === task.answer;
         const res = await fetch(`/api/tasks`, {
             method: "POST",
@@ -45,12 +45,18 @@ export default function Quiz({ task, roadmapId, chapterNumber }) {
         });
         if (res.ok) {
             setIsCorrect(isCorrect);
-            getXp()
             setIsAnswered(true);
+            
+            // Award 2 XP for correct answer (silently)
+            if (isCorrect && awardXP) {
+                await awardXP('correct_answer', 2);
+            }
+            
+            getXp();
         } else {
             toast.error("Failed to submit task, Try again.");
         }
-        setSubmitting(false)
+        setSubmitting(false);
     };
 
     useEffect(() => {

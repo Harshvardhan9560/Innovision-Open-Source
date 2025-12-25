@@ -132,6 +132,12 @@ export default function Page() {
           )
         : [];
 
+    // Debug log
+    useEffect(() => {
+        console.log("Curriculum Data:", curriculumData);
+        console.log("Available Subjects:", availableCurriculumSubjects);
+    }, [curriculumData, availableCurriculumSubjects]);
+
     const handleCurriculumSubmit = async () => {
         if (!curriculumData.classLevel || !curriculumData.board) {
             toast.error("Please select class and board");
@@ -799,11 +805,16 @@ Return valid JSON only.`;
                                                     <button
                                                         key={subject.id}
                                                         type="button"
-                                                        onClick={() => setCurriculumData(prev => ({ 
-                                                            ...prev, 
-                                                            subject: subject.name,
-                                                            topics: subject.topics || ["", "", ""]
-                                                        }))}
+                                                        onClick={() => {
+                                                            const subjectTopics = subject.topics && subject.topics.length > 0 
+                                                                ? subject.topics 
+                                                                : ["", "", ""];
+                                                            setCurriculumData(prev => ({ 
+                                                                ...prev, 
+                                                                subject: subject.name,
+                                                                topics: subjectTopics
+                                                            }));
+                                                        }}
                                                         className={`text-xs px-2.5 py-1.5 rounded-md transition-all ${
                                                             curriculumData.subject === subject.name
                                                                 ? "bg-primary text-primary-foreground shadow-sm"

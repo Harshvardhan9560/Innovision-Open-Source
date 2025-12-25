@@ -17,7 +17,7 @@ async function getRoadmap(id) {
     if (session) {
         const docRef = doc(db, "users", session.user.email, "roadmaps", id);
         const docSnap = await getDoc(docRef);
-        if (!docSnap.exists) {
+        if (!docSnap.exists()) {
             return false;
         }
         

@@ -1,14 +1,15 @@
 "use client";
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect, useContext } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, Flame, Award, Zap, Crown, Medal, Target, Moon, Sun, Users } from "lucide-react";
+import { Trophy, Flame, Award, Crown, Medal } from "lucide-react";
 import * as Icons from "lucide-react";
+import xpContext from "@/contexts/xp";
 
 export default function GamificationDashboard({ userId }) {
+  const { xp } = useContext(xpContext); // Use XP from context for consistency
   const [stats, setStats] = useState({
-    xp: 0,
     level: 1,
     streak: 0,
     badges: [],
@@ -16,9 +17,15 @@ export default function GamificationDashboard({ userId }) {
     achievements: []
   });
 
+  console.log("GamificationDashboard - XP from context:", xp);
+
   useEffect(() => {
     if (userId) {
       fetchGamificationStats();
+      
+      // Refresh stats every 5 seconds for real-time updates
+      const interval = setInterval(fetchGamificationStats, 5000);
+      return () => clearInterval(interval);
     }
   }, [userId]);
 
@@ -26,21 +33,42 @@ export default function GamificationDashboard({ userId }) {
     try {
       const res = await fetch(`/api/gamification/stats?userId=${userId}`);
       const data = await res.json();
-      setStats(data || {
-        xp: 0,
+      
+      console.log("GamificationDashboard - Fetched data:", data);
+      
+      if (data.error) {
+        setStats({
+          level: 1,
+          streak: 0,
+          badges: [],
+          rank: 0,
+          achievements: []
+        });
+        return;
+      }
+      
+      // Use data from API but XP will come from context
+      setStats({
+        level: data.level || 1,
+        streak: data.streak || 0,
+        badges: data.badges || [],
+        rank: data.rank || 0,
+        achievements: data.achievements || []
+      });
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+      setStats({
         level: 1,
         streak: 0,
         badges: [],
         rank: 0,
         achievements: []
       });
-    } catch (error) {
-      console.error("Error fetching stats:", error);
     }
   };
 
   const xpToNextLevel = stats.level * 1000;
-  const xpProgress = (stats.xp % 1000) / 10;
+  const xpProgress = (xp % 1000) / 10;
 
   return (
     <div className="space-y-4">
@@ -56,7 +84,7 @@ export default function GamificationDashboard({ userId }) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.level}</div>
-            <p className="text-xs text-muted-foreground">{stats.xp} XP</p>
+            <p className="text-xs text-muted-foreground">{xp} XP</p>
           </CardContent>
         </Card>
 
@@ -108,7 +136,7 @@ export default function GamificationDashboard({ userId }) {
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm">Progress to Level {stats.level + 1}</CardTitle>
-            <span className="text-xs text-muted-foreground">{stats.xp % 1000} / {xpToNextLevel}</span>
+            <span className="text-xs text-muted-foreground">{xp % 1000} / {xpToNextLevel}</span>
           </div>
         </CardHeader>
         <CardContent>

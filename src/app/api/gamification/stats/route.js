@@ -77,7 +77,8 @@ export async function POST(request) {
       perfect_quiz: 200,
       help_student: 75,
       view_course: 10,
-      complete_lesson: 50
+      complete_lesson: 50,
+      correct_answer: 2  // 2 XP per correct answer
     };
 
     const xpGained = xpRewards[action] || value || 0;
@@ -86,7 +87,7 @@ export async function POST(request) {
 
     // Update streak for actual learning activities only
     let currentStreak = stats.streak || 0;
-    const learningActions = ['complete_chapter', 'complete_course', 'perfect_quiz', 'complete_lesson', 'view_course'];
+    const learningActions = ['complete_chapter', 'complete_course', 'perfect_quiz', 'complete_lesson', 'view_course', 'correct_answer'];
     
     if (learningActions.includes(action)) {
       const lastActive = stats.lastActive ? new Date(stats.lastActive) : null;
@@ -183,7 +184,8 @@ function getAchievementTitle(action) {
     perfect_quiz: "Perfect Score!",
     help_student: "Helpful Hand",
     view_course: "Course Viewed!",
-    complete_lesson: "Lesson Complete!"
+    complete_lesson: "Lesson Complete!",
+    correct_answer: "Correct Answer!"
   };
   return titles[action] || "Achievement Unlocked!";
 }
@@ -195,7 +197,8 @@ function getAchievementDescription(action) {
     perfect_quiz: "You scored 100% on a quiz",
     help_student: "You helped another student",
     view_course: "You viewed a course",
-    complete_lesson: "You completed a lesson"
+    complete_lesson: "You completed a lesson",
+    correct_answer: "You answered correctly"
   };
   return descriptions[action] || "You earned an achievement";
 }

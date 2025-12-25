@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { Loader } from "lucide-react";
+import { Loader, CheckCircle, XCircle } from "lucide-react";
 import { useContext } from "react";
 import xpContext from "@/contexts/xp";
 
@@ -26,7 +26,7 @@ export default function Match({ task, roadmapId, chapterNumber }) {
     const [isCorrect, setIsCorrect] = useState([]);
     const [score, setScore] = useState(0);
     const [lines, setLines] = useState([]);
-    const { getXp } = useContext(xpContext);
+    const { getXp, awardXP } = useContext(xpContext);
 
     const leftRefs = useRef([]);
     const rightRefs = useRef([]);
@@ -173,9 +173,17 @@ export default function Match({ task, roadmapId, chapterNumber }) {
         });
         if (res.ok) {
             setIsCorrect(correctnessArray);
-            setScore(correctnessArray.filter(Boolean).length);
-            getXp()
+            const correctCount = correctnessArray.filter(Boolean).length;
+            setScore(correctCount);
             setSubmitted(true);
+            
+            // Award 2 XP for each correct match (silently)
+            if (correctCount > 0 && awardXP) {
+                const xpEarned = correctCount * 2;
+                await awardXP('correct_answer', xpEarned);
+            }
+            
+            getXp();
         } else {
             toast.error("Failed to submit task, Try again.");
         }

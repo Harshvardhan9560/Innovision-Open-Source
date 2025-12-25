@@ -28,7 +28,6 @@ export default function CoursesPage() {
         setCourses(data.courses || []);
       }
     } catch (error) {
-      console.error("Failed to fetch courses:", error);
       toast.error("Failed to load courses");
     }
     setLoading(false);

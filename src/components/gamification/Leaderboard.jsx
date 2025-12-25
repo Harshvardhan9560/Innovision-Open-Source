@@ -15,15 +15,33 @@ export default function Leaderboard({ currentUserId }) {
 
   useEffect(() => {
     fetchLeaderboard();
+    
+    // Refresh leaderboard every 10 seconds for real-time updates
+    const interval = setInterval(fetchLeaderboard, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchLeaderboard = async () => {
     try {
       const res = await fetch("/api/gamification/leaderboard");
       const data = await res.json();
+      
+      if (data.error) {
+        setLeaderboard({
+          daily: [],
+          weekly: [],
+          allTime: []
+        });
+        return;
+      }
+      
       setLeaderboard(data);
     } catch (error) {
-      console.error("Error fetching leaderboard:", error);
+      setLeaderboard({
+        daily: [],
+        weekly: [],
+        allTime: []
+      });
     }
   };
 

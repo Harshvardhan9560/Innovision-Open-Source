@@ -31,7 +31,6 @@ export async function GET(request) {
       courses 
     });
   } catch (error) {
-    console.error("Error fetching public courses:", error);
     return NextResponse.json(
       { error: "Failed to fetch courses", details: error.message },
       { status: 500 }

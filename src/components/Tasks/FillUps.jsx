@@ -20,7 +20,7 @@ const FillUps = ({ task, roadmapId, chapterNumber }) => {
     const [isAnswered, setIsAnswered] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [isCorrect, setIsCorrect] = useState(false);
-    const {getXp} = useContext(xpContext)
+    const { getXp, awardXP } = useContext(xpContext);
 
     const handleInputChange = (e) => {
         if (isAnswered) return;
@@ -55,9 +55,15 @@ const FillUps = ({ task, roadmapId, chapterNumber }) => {
             }),
         });
         if (res.ok) {
-            getXp()
             setIsCorrect(isCorrect);
             setIsAnswered(true);
+            
+            // Award 2 XP for correct answer (silently)
+            if (isCorrect && awardXP) {
+                await awardXP('correct_answer', 2);
+            }
+            
+            getXp();
         } else {
             toast.error("Failed to submit task, Try again.");
         }

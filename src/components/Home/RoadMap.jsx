@@ -1,12 +1,17 @@
 "use client"
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { CircleCheckIcon } from "lucide-react";
+import xpContext from "@/contexts/xp";
+import { useSession } from "next-auth/react";
 
 function Roadmap({ roadMap, id }) {
     const [height, setHeight] = useState(
         (roadMap.chapters.length - 1) * 34 * 4
     );
+    const { awardXP } = useContext(xpContext);
+    const { data: session } = useSession();
+    const [viewAwarded, setViewAwarded] = useState(false);
 
     useEffect(() => {
         function updateHeight() {
@@ -22,6 +27,14 @@ function Roadmap({ roadMap, id }) {
         
         return () => window.removeEventListener("resize", updateHeight);
     }, [roadMap.chapters.length]);
+
+    // Award XP for viewing the course (only once per session)
+    useEffect(() => {
+        if (session && awardXP && !viewAwarded) {
+            awardXP('view_course');
+            setViewAwarded(true);
+        }
+    }, [session, awardXP, viewAwarded]);
 
     return (
         <div className="flex flex-col justify-center max-w-3xl">
@@ -48,13 +61,13 @@ function Roadmap({ roadMap, id }) {
 
                         <Link
                             href={`/chapter-test/${id}/${index + 1}`}
-                            className="flex flex-col border h-max max-w-xl w-[85%] rounded-md p-4"
+                            className="flex flex-col border h-max max-w-xl w-[85%] rounded-md p-4 hover:border-blue-400 transition-colors"
                         >
                             <span className="text-secondary-foreground font-semibold">
-                                {chapter.chapterNumber} . {chapter.chapterTitle}
+                                {chapter.chapterNumber || index + 1} . {chapter.chapterTitle || chapter.title || `Chapter ${index + 1}`}
                             </span>
                             <span className="text-secondary-foreground">
-                                {chapter.chapterDescription}
+                                {chapter.chapterDescription || chapter.description || ""}
                             </span>
                         </Link>
                     </div>

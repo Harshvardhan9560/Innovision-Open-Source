@@ -53,17 +53,33 @@ const Navbar = () => {
       
       // Fetch streak if user is logged in
       if (session?.user?.email) {
-        try {
-          const res = await fetch(`/api/gamification/stats?userId=${session.user.email}`);
-          const data = await res.json();
-          setStreak(data.streak || 0);
-        } catch (error) {
-          console.error("Error fetching streak:", error);
-        }
+        fetchStreak(session.user.email);
       }
     };
     fetchSession();
   }, []);
+
+  // Function to fetch streak
+  const fetchStreak = async (email) => {
+    try {
+      const res = await fetch(`/api/gamification/stats?userId=${email}`);
+      const data = await res.json();
+      setStreak(data.streak || 0);
+    } catch (error) {
+      console.error("Error fetching streak:", error);
+    }
+  };
+
+  // Poll for streak updates every 10 seconds
+  useEffect(() => {
+    if (session?.user?.email) {
+      const interval = setInterval(() => {
+        fetchStreak(session.user.email);
+      }, 10000); // Update every 10 seconds
+      
+      return () => clearInterval(interval);
+    }
+  }, [session]);
 
   // Sign out user
   const signOutUser = async () => {
@@ -155,18 +171,6 @@ const Navbar = () => {
                     </li>
                     <li onClick={() => setSidebar(false)}>
                       <Link 
-                        href="/profile"
-                        className={`block py-2 px-3 rounded-lg transition-all duration-200 hover:bg-slate-100/80 ${
-                          isActiveLink("/profile") 
-                            ? "bg-blue-50 text-blue-600 font-semibold border-l-4 border-blue-500" 
-                            : ""
-                        }`}
-                      >
-                        Profile
-                      </Link>
-                    </li>
-                    <li onClick={() => setSidebar(false)}>
-                      <Link 
                         href="/courses"
                         className={`flex items-center gap-2 py-2 px-3 rounded-lg transition-all duration-200 hover:bg-slate-100/80 ${
                           pathname?.startsWith("/courses") 
@@ -189,32 +193,6 @@ const Navbar = () => {
                       >
                         <Palette className="h-4 w-4" />
                         Studio
-                      </Link>
-                    </li>
-                    <li onClick={() => setSidebar(false)}>
-                      <Link 
-                        href="/gamification"
-                        className={`flex items-center gap-2 py-2 px-3 rounded-lg transition-all duration-200 hover:bg-slate-100/80 ${
-                          isActiveLink("/gamification") 
-                            ? "bg-blue-50 text-blue-600 font-semibold border-l-4 border-blue-500" 
-                            : ""
-                        }`}
-                      >
-                        <Trophy className="h-4 w-4" />
-                        Gamification
-                      </Link>
-                    </li>
-                    <li onClick={() => setSidebar(false)}>
-                      <Link 
-                        href="/research"
-                        className={`flex items-center gap-2 py-2 px-3 rounded-lg transition-all duration-200 hover:bg-slate-100/80 ${
-                          isActiveLink("/research") 
-                            ? "bg-blue-50 text-blue-600 font-semibold border-l-4 border-blue-500" 
-                            : ""
-                        }`}
-                      >
-                        <BarChart3 className="h-4 w-4" />
-                        Research
                       </Link>
                     </li>
                     <li onClick={() => setSidebar(false)}>

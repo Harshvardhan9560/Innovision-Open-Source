@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,6 +38,9 @@ export default function StudioPage() {
   const [loadingCourses, setLoadingCourses] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [courseToDelete, setCourseToDelete] = useState(null);
+  const [editorMode, setEditorMode] = useState("edit"); // "edit" or "preview"
+  const [editingCourseId, setEditingCourseId] = useState(null); // Track if editing existing course
+  const [previewChapter, setPreviewChapter] = useState(null); // Track which chapter to preview
 
   const handleSaveDraft = async () => {
     if (!courseTitle) {
@@ -80,25 +85,36 @@ export default function StudioPage() {
       chapters,
       status: "published",
       createdBy: session?.user?.email,
-      publishedAt: new Date().toISOString()
+      publishedAt: editingCourseId ? undefined : new Date().toISOString(), // Keep original publish date if updating
+      updatedAt: new Date().toISOString()
     };
 
     try {
-      const res = await fetch("/api/studio/publish", {
-        method: "POST",
+      const url = editingCourseId 
+        ? `/api/studio/courses/${editingCourseId}` 
+        : "/api/studio/publish";
+      
+      const method = editingCourseId ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(courseData)
       });
 
       if (res.ok) {
-        toast.success("Course published successfully!");
+        toast.success(editingCourseId ? "Course updated successfully!" : "Course published successfully!");
         // Refresh the courses list
         await fetchPublishedCourses();
         // Switch to courses tab to show the published course
         setActiveTab("courses");
+        // Reset editing state
+        setEditingCourseId(null);
+      } else {
+        toast.error(editingCourseId ? "Failed to update course" : "Failed to publish course");
       }
     } catch (error) {
-      toast.error("Failed to publish course");
+      toast.error(editingCourseId ? "Failed to update course" : "Failed to publish course");
     }
   };
 
@@ -131,8 +147,9 @@ export default function StudioPage() {
     setCourseTitle(course.title);
     setCourseDescription(course.description);
     setChapters(course.chapters || []);
+    setEditingCourseId(course.id); // Track that we're editing this course
     setActiveTab("editor");
-    toast.success("Course loaded successfully!");
+    toast.success("Course loaded for editing!");
   };
 
   const handleDeleteClick = (course) => {
@@ -170,8 +187,9 @@ export default function StudioPage() {
   }, [session, activeTab]);
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-background">
+      <div className="pt-20 p-6">
+        <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Instructor Authoring Studio</h1>
           <p className="text-muted-foreground">Create and edit courses with AI assistance</p>
@@ -208,13 +226,34 @@ export default function StudioPage() {
                     <Plus className="h-4 w-4 mr-2" />
                     Add Chapter
                   </Button>
+                  {editingCourseId && (
+                    <Button 
+                      onClick={() => {
+                        setCourseTitle("");
+                        setCourseDescription("");
+                        setChapters([]);
+                        setCurrentChapter(null);
+                        setEditingCourseId(null);
+                        toast.success("Ready to create new course!");
+                      }} 
+                      className="w-full" 
+                      variant="outline"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      New Course
+                    </Button>
+                  )}
                   <Button onClick={handleSaveDraft} className="w-full" variant="secondary">
                     <Save className="h-4 w-4 mr-2" />
                     Save Draft
                   </Button>
+                  <Button onClick={() => setActiveTab("preview")} className="w-full" variant="outline">
+                    <Eye className="h-4 w-4 mr-2" />
+                    Preview Course
+                  </Button>
                   <Button onClick={handlePublish} className="w-full">
                     <Upload className="h-4 w-4 mr-2" />
-                    Publish Course
+                    {editingCourseId ? "Update Course" : "Publish Course"}
                   </Button>
                 </div>
               </CardContent>
@@ -233,7 +272,7 @@ export default function StudioPage() {
                       onClick={() => setCurrentChapter(chapter)}
                       className={`p-3 border rounded cursor-pointer transition-all ${
                         currentChapter?.id === chapter.id
-                          ? "border-blue-400 bg-blue-50"
+                          ? "border-blue-400 bg-blue-50 dark:bg-blue-950/20"
                           : "hover:bg-accent"
                       }`}
                     >
@@ -251,7 +290,7 @@ export default function StudioPage() {
           {/* Main Editor Area */}
           <div className="lg:col-span-2">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="editor">
                   <FileText className="h-4 w-4 mr-2" />
                   Editor
@@ -264,22 +303,103 @@ export default function StudioPage() {
                   <LinkIcon className="h-4 w-4 mr-2" />
                   Resources
                 </TabsTrigger>
-                <TabsTrigger value="courses">
+                <TabsTrigger value="preview">
                   <Eye className="h-4 w-4 mr-2" />
+                  Preview
+                </TabsTrigger>
+                <TabsTrigger value="courses">
+                  <BookOpen className="h-4 w-4 mr-2" />
                   My Courses
                 </TabsTrigger>
               </TabsList>
 
               <TabsContent value="editor">
                 {currentChapter ? (
-                  <WYSIWYGEditor
-                    chapter={currentChapter}
-                    onUpdate={(updatedChapter) => {
-                      setChapters(chapters.map(ch => 
-                        ch.id === updatedChapter.id ? updatedChapter : ch
-                      ));
-                    }}
-                  />
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <CardTitle>Chapter Editor</CardTitle>
+                        {/* Edit/Preview Toggle */}
+                        <div className="flex gap-1 border rounded-lg p-1">
+                          <Button
+                            size="sm"
+                            variant={editorMode === "edit" ? "default" : "ghost"}
+                            onClick={() => setEditorMode("edit")}
+                            className="h-8"
+                          >
+                            <FileText className="h-4 w-4 mr-2" />
+                            Edit
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant={editorMode === "preview" ? "default" : "ghost"}
+                            onClick={() => setEditorMode("preview")}
+                            className="h-8"
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            Preview
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {editorMode === "edit" ? (
+                        <WYSIWYGEditor
+                          chapter={currentChapter}
+                          onUpdate={(updatedChapter) => {
+                            setChapters(chapters.map(ch => 
+                              ch.id === updatedChapter.id ? updatedChapter : ch
+                            ));
+                            setCurrentChapter(updatedChapter);
+                          }}
+                        />
+                      ) : (
+                        <div className="prose prose-slate dark:prose-invert max-w-none min-h-[500px] p-6 border rounded-lg">
+                          <h2 className="text-2xl font-bold mb-4">{currentChapter.title}</h2>
+                          {currentChapter.content ? (
+                            <ReactMarkdown 
+                              remarkPlugins={[remarkGfm]}
+                              components={{
+                                h1: ({node, ...props}) => <h1 className="text-3xl font-bold mt-6 mb-4" {...props} />,
+                                h2: ({node, ...props}) => <h2 className="text-2xl font-bold mt-5 mb-3" {...props} />,
+                                h3: ({node, ...props}) => <h3 className="text-xl font-bold mt-4 mb-2" {...props} />,
+                                p: ({node, ...props}) => <p className="mb-4 leading-7" {...props} />,
+                                ul: ({node, ...props}) => <ul className="list-disc list-inside mb-4 space-y-2" {...props} />,
+                                ol: ({node, ...props}) => <ol className="list-decimal list-inside mb-4 space-y-2" {...props} />,
+                                li: ({node, ...props}) => <li className="ml-4" {...props} />,
+                                code: ({node, inline, ...props}) => 
+                                  inline 
+                                    ? <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono" {...props} />
+                                    : <code className="block bg-muted p-4 rounded-lg text-sm font-mono overflow-x-auto mb-4" {...props} />,
+                                blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-blue-500 pl-4 italic my-4 text-muted-foreground" {...props} />,
+                                strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
+                                em: ({node, ...props}) => <em className="italic" {...props} />,
+                              }}
+                            >
+                              {currentChapter.content}
+                            </ReactMarkdown>
+                          ) : (
+                            <p className="text-muted-foreground italic">No content yet. Switch to Edit mode to add content.</p>
+                          )}
+                          {currentChapter.resources && currentChapter.resources.length > 0 && (
+                            <div className="mt-8 pt-6 border-t">
+                              <h3 className="text-lg font-semibold mb-3">Resources</h3>
+                              <ul className="space-y-2">
+                                {currentChapter.resources.map((resource, idx) => (
+                                  <li key={idx} className="flex items-center gap-2">
+                                    <LinkIcon className="h-4 w-4 text-blue-500" />
+                                    <a href={resource.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                                      {resource.title}
+                                    </a>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
                 ) : (
                   <Card>
                     <CardContent className="flex items-center justify-center h-64">
@@ -324,6 +444,142 @@ export default function StudioPage() {
                     }
                   }}
                 />
+              </TabsContent>
+
+              <TabsContent value="preview">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Course Preview</CardTitle>
+                    <CardDescription>See how your course will appear to students</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {!courseTitle ? (
+                      <div className="text-center text-muted-foreground py-8">
+                        <Eye className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p>Add a course title to preview</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-6">
+                        {/* Course Header Preview */}
+                        <div className="border-b pb-6">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1">
+                              <h1 className="text-3xl font-bold mb-2">{courseTitle}</h1>
+                              <p className="text-lg text-muted-foreground">{courseDescription || "No description provided"}</p>
+                            </div>
+                            <div className="ml-4 px-3 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-full text-sm font-medium">
+                              Preview
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-2">
+                              <BookOpen className="h-4 w-4" />
+                              <span>{chapters.length} chapters</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <FileText className="h-4 w-4" />
+                              <span>By {session?.user?.name || session?.user?.email || "Instructor"}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Chapters Preview */}
+                        <div>
+                          <h2 className="text-xl font-bold mb-4">Course Content</h2>
+                          {chapters.length > 0 ? (
+                            <div className="space-y-3">
+                              {chapters.map((chapter, index) => (
+                                <Card 
+                                  key={chapter.id}
+                                  className="cursor-pointer hover:border-blue-400 transition-all"
+                                  onClick={() => setPreviewChapter(previewChapter?.id === chapter.id ? null : chapter)}
+                                >
+                                  <CardHeader>
+                                    <CardTitle className="text-lg flex items-center gap-2">
+                                      <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 text-sm font-bold">
+                                        {index + 1}
+                                      </span>
+                                      {chapter.title}
+                                      {chapter.resources && chapter.resources.length > 0 && (
+                                        <span className="ml-auto text-xs text-muted-foreground">
+                                          {chapter.resources.length} resource{chapter.resources.length !== 1 ? 's' : ''}
+                                        </span>
+                                      )}
+                                    </CardTitle>
+                                  </CardHeader>
+                                  {previewChapter?.id === chapter.id && chapter.content && (
+                                    <CardContent>
+                                      <div className="prose prose-slate dark:prose-invert max-w-none border-t pt-4">
+                                        <ReactMarkdown 
+                                          remarkPlugins={[remarkGfm]}
+                                          components={{
+                                            h1: ({node, ...props}) => <h1 className="text-2xl font-bold mt-4 mb-3" {...props} />,
+                                            h2: ({node, ...props}) => <h2 className="text-xl font-bold mt-3 mb-2" {...props} />,
+                                            h3: ({node, ...props}) => <h3 className="text-lg font-bold mt-2 mb-2" {...props} />,
+                                            p: ({node, ...props}) => <p className="mb-3 leading-7" {...props} />,
+                                            ul: ({node, ...props}) => <ul className="list-disc list-inside mb-3 space-y-1" {...props} />,
+                                            ol: ({node, ...props}) => <ol className="list-decimal list-inside mb-3 space-y-1" {...props} />,
+                                            li: ({node, ...props}) => <li className="ml-4" {...props} />,
+                                            code: ({node, inline, ...props}) => 
+                                              inline 
+                                                ? <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono" {...props} />
+                                                : <code className="block bg-muted p-4 rounded-lg text-sm font-mono overflow-x-auto mb-3" {...props} />,
+                                            blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-blue-500 pl-4 italic my-3 text-muted-foreground" {...props} />,
+                                            strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
+                                            em: ({node, ...props}) => <em className="italic" {...props} />,
+                                          }}
+                                        >
+                                          {chapter.content}
+                                        </ReactMarkdown>
+                                        {chapter.resources && chapter.resources.length > 0 && (
+                                          <div className="mt-6 pt-4 border-t">
+                                            <h3 className="text-lg font-semibold mb-3">Resources</h3>
+                                            <ul className="space-y-2">
+                                              {chapter.resources.map((resource, idx) => (
+                                                <li key={idx} className="flex items-center gap-2">
+                                                  <LinkIcon className="h-4 w-4 text-blue-500" />
+                                                  <a href={resource.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                                                    {resource.title}
+                                                  </a>
+                                                </li>
+                                              ))}
+                                            </ul>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </CardContent>
+                                  )}
+                                </Card>
+                              ))}
+                            </div>
+                          ) : (
+                            <Card>
+                              <CardContent className="py-8 text-center text-muted-foreground">
+                                <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                                <p>No chapters added yet</p>
+                                <p className="text-sm mt-2">Add chapters to see them in the preview</p>
+                              </CardContent>
+                            </Card>
+                          )}
+                        </div>
+
+                        {/* Preview Note */}
+                        <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                          <div className="flex items-start gap-3">
+                            <Eye className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+                            <div>
+                              <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">Preview Mode</h3>
+                              <p className="text-sm text-blue-700 dark:text-blue-300">
+                                This is how your course will appear to students after publishing. Make sure all content looks correct before publishing.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               </TabsContent>
 
               <TabsContent value="courses">
@@ -388,6 +644,7 @@ export default function StudioPage() {
           </div>
         </div>
       </div>
+    </div>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>

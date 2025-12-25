@@ -17,6 +17,21 @@ export async function GET(request) {
     const usersSnapshot = await getDocs(collection(db, "users"));
     const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
+    // Fetch gamification data (XP source of truth)
+    const gamificationSnapshot = await getDocs(collection(db, "gamification"));
+    const gamificationData = {};
+    gamificationSnapshot.docs.forEach(doc => {
+      gamificationData[doc.id] = doc.data();
+    });
+
+    // Merge user data with gamification data
+    const usersWithXP = users.map(user => ({
+      ...user,
+      xp: gamificationData[user.email]?.xp || 0,
+      level: gamificationData[user.email]?.level || 1,
+      streak: gamificationData[user.email]?.streak || 0
+    }));
+
     // Fetch all roadmaps/courses
     const roadmapsSnapshot = await getDocs(collection(db, "roadmaps"));
     const roadmaps = roadmapsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -31,14 +46,14 @@ export async function GET(request) {
     const startTime = now - (timeRanges[timeRange] || timeRanges["7d"]);
 
     // Filter users by time range if they have createdAt
-    const recentUsers = users.filter(user => 
+    const recentUsers = usersWithXP.filter(user => 
       !user.createdAt || user.createdAt >= startTime
     );
 
     // Aggregate analytics
     const analytics = {
       overview: {
-        totalStudents: users.length,
+        totalStudents: usersWithXP.length,
         totalCourses: roadmaps.length,
         avgCompletionRate: 0,
         totalXpEarned: 0,
@@ -64,7 +79,7 @@ export async function GET(request) {
     let totalCompletedCourses = 0;
     let totalCourses = 0;
 
-    users.forEach(user => {
+    usersWithXP.forEach(user => {
       totalXp += user.xp || 0;
       
       // Count completed courses from user's roadmaps
@@ -79,11 +94,11 @@ export async function GET(request) {
       : 0;
 
     // Calculate engagement metrics
-    const usersWithActivity = users.filter(u => u.xp > 0);
-    analytics.engagement.taskCompletionRate = usersWithActivity.length / Math.max(users.length, 1);
+    const usersWithActivity = usersWithXP.filter(u => u.xp > 0);
+    analytics.engagement.taskCompletionRate = usersWithActivity.length / Math.max(usersWithXP.length, 1);
 
     // Top performers by XP - remove duplicates by email
-    const uniqueUsers = users.reduce((acc, user) => {
+    const uniqueUsers = usersWithXP.reduce((acc, user) => {
       const existing = acc.find(u => u.email === user.email);
       if (!existing) {
         acc.push(user);
@@ -148,7 +163,7 @@ export async function GET(request) {
     });
 
     // Calculate average score (based on XP as proxy)
-    const avgXp = totalXp / Math.max(users.length, 1);
+    const avgXp = totalXp / Math.max(usersWithXP.length, 1);
     analytics.performance.avgScore = Math.min(avgXp / 1000, 1); // Normalize to 0-1
 
     return NextResponse.json(analytics);
