@@ -15,10 +15,15 @@ import StreakCalendar from "@/components/gamification/StreakCalendar";
 import DailyChallenges from "@/components/gamification/DailyChallenges";
 import SkillTree from "@/components/gamification/SkillTree";
 import Leaderboard from "@/components/gamification/Leaderboard";
-import { Download, Database, Shield, FileText } from "lucide-react";
+import { Download, Database, Shield, FileText, Crown, Lock } from "lucide-react";
+import TrialBanner from "@/components/TrialBanner";
+import PremiumDialog from "@/components/PremiumDialog";
+import LockedFeature from "@/components/LockedFeature";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
   const { user } = useAuth();
+  const router = useRouter();
   const [userData, setUserData] = useState({});
   const [recentRoadmaps, setRecentRoadmaps] = useState([]);
   const [completedRoadmaps, setCompletedRoadmaps] = useState([]);
@@ -27,12 +32,31 @@ export default function ProfilePage() {
   const [difficultyLevel, setDifficultyLevel] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
   const [exporting, setExporting] = useState(false);
+  const [premiumStatus, setPremiumStatus] = useState(null);
+  const [showPremiumDialog, setShowPremiumDialog] = useState(false);
+  const [blockedFeature, setBlockedFeature] = useState("");
 
   useEffect(() => {
     fetchUser();
     fetchRank();
     fetchRoadmaps();
   }, []);
+
+  // Handle premium status from TrialBanner
+  const handleStatusChange = (status) => {
+    setPremiumStatus(status);
+  };
+
+  // Check if user has access (premium or in trial)
+  const hasAccess = premiumStatus?.hasFullAccess || premiumStatus?.isPremium || premiumStatus?.isInTrial;
+
+  // Show premium dialog for blocked features
+  const handleBlockedFeature = (featureName) => {
+    if (!hasAccess) {
+      setBlockedFeature(featureName);
+      setShowPremiumDialog(true);
+    }
+  };
 
   async function fetchUser() {
     const res = await fetch("/api/getuser");
@@ -94,6 +118,16 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto p-6">
+        {/* Trial Banner */}
+        <TrialBanner onStatusChange={handleStatusChange} />
+        
+        {/* Premium Dialog */}
+        <PremiumDialog 
+          open={showPremiumDialog} 
+          onOpenChange={setShowPremiumDialog}
+          feature={blockedFeature}
+        />
+
         <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
           {/* Left Sidebar - All original features */}
           <Sidebar
@@ -141,17 +175,19 @@ export default function ProfilePage() {
 
               {/* Progress Tab - XP Chart */}
               <TabsContent value="progress" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>XP Earned</CardTitle>
-                    <CardDescription>Your XP earned data over the last year</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ProblemSolvedChart questions={Object.values(userData?.xptrack || {})} />
-                  </CardContent>
-                </Card>
+                <LockedFeature featureName="Progress Analytics" hasAccess={hasAccess} showPreview={true}>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>XP Earned</CardTitle>
+                      <CardDescription>Your XP earned data over the last year</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ProblemSolvedChart questions={Object.values(userData?.xptrack || {})} />
+                    </CardContent>
+                  </Card>
 
-                {user?.email && <XPChart userId={user.email} />}
+                  {user?.email && <XPChart userId={user.email} />}
+                </LockedFeature>
               </TabsContent>
 
               {/* Courses Tab */}
@@ -177,25 +213,30 @@ export default function ProfilePage() {
 
               {/* Activity Tab - Streak Calendar */}
               <TabsContent value="activity" className="space-y-4">
-                {user?.email && <StreakCalendar userId={user.email} />}
+                <LockedFeature featureName="Activity Calendar" hasAccess={hasAccess} showPreview={true}>
+                  {user?.email && <StreakCalendar userId={user.email} />}
+                </LockedFeature>
               </TabsContent>
 
               {/* Compete Tab - Challenges, Skills, Leaderboard */}
               <TabsContent value="compete" className="space-y-4">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {/* Daily Challenges */}
-                  {user?.email && <DailyChallenges userId={user.email} />}
+                <LockedFeature featureName="Compete Features" hasAccess={hasAccess} showPreview={true}>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {/* Daily Challenges */}
+                    {user?.email && <DailyChallenges userId={user.email} />}
 
-                  {/* Skill Tree */}
-                  <SkillTree />
-                </div>
+                    {/* Skill Tree */}
+                    <SkillTree />
+                  </div>
 
-                {/* Leaderboard */}
-                {user?.email && <Leaderboard currentUserId={user.email} />}
+                  {/* Leaderboard */}
+                  {user?.email && <Leaderboard currentUserId={user.email} />}
+                </LockedFeature>
               </TabsContent>
 
               {/* Research Tab - Data Export */}
               <TabsContent value="research" className="space-y-4">
+                <LockedFeature featureName="Research Data Export" hasAccess={hasAccess} showPreview={true}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Interaction Dataset */}
                   <Card>
@@ -293,6 +334,7 @@ export default function ProfilePage() {
                     </ul>
                   </CardContent>
                 </Card>
+                </LockedFeature>
               </TabsContent>
             </Tabs>
           </div>

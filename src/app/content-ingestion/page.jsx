@@ -1,16 +1,41 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Upload, FileText, BookOpen, Network, Loader2 } from "lucide-react";
+import { Upload, FileText, BookOpen, Network, Loader2, Crown } from "lucide-react";
 import { toast } from "sonner";
 
 export default function ContentIngestion() {
   const [uploading, setUploading] = useState(false);
   const [file, setFile] = useState(null);
+  const [premiumStatus, setPremiumStatus] = useState({ isPremium: false });
+  const router = useRouter();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const fetchPremiumStatus = async () => {
+      if (user) {
+        try {
+          const res = await fetch("/api/premium/status");
+          const data = await res.json();
+          setPremiumStatus(data);
+        } catch (error) {
+          console.error("Error fetching premium status:", error);
+        }
+      }
+    };
+    fetchPremiumStatus();
+  }, [user]);
 
   const handleFileUpload = async (type) => {
+    if (!premiumStatus.isPremium) {
+      toast.error("Content Ingestion is only available for Premium users. Please upgrade!");
+      return;
+    }
+
     if (!file) {
       toast.error("Please select a file first");
       return;
@@ -50,6 +75,28 @@ export default function ContentIngestion() {
             Auto-ingest PDFs and textbooks to build knowledge graphs
           </p>
         </div>
+
+        {!premiumStatus.isPremium && (
+          <div className="mb-6 p-4 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 rounded-lg">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center">
+                <Crown className="h-5 w-5 text-black" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg mb-1">Preview Only</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Content Ingestion is a Premium feature. Upgrade to upload and process PDFs, textbooks, and build knowledge graphs!
+                </p>
+                <Button
+                  onClick={() => router.push("/premium")}
+                  className="bg-yellow-500 hover:bg-yellow-600 text-black"
+                >
+                  Upgrade to Premium - ₹100/month
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Upload Section */}

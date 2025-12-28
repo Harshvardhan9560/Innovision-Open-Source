@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Download, Wifi, WifiOff, CheckCircle, Loader2 } from "lucide-react";
+import { ArrowLeft, Download, Wifi, WifiOff, CheckCircle, Loader2, Crown } from "lucide-react";
 import Link from "next/link";
 import { useOffline } from "@/hooks/useOffline";
 import { toast } from "sonner";
@@ -16,18 +16,34 @@ export default function OfflinePage() {
   const [courses, setCourses] = useState([]);
   const [offlineLoading, setOfflineLoading] = useState(true);
   const [downloading, setDownloading] = useState(null);
+  const [premiumStatus, setPremiumStatus] = useState({ isPremium: false });
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    const fetchPremiumStatus = async () => {
+      if (user) {
+        try {
+          const res = await fetch("/api/premium/status");
+          const data = await res.json();
+          setPremiumStatus(data);
+        } catch (error) {
+          console.error("Error fetching premium status:", error);
+        }
+      }
+    };
+    fetchPremiumStatus();
+  }, [user]);
+
+  useEffect(() => {
+    if (!user && !loading) {
       router.push("/login");
     }
-  }, [status, router]);
+  }, [user, loading, router]);
 
   useEffect(() => {
-    if (session) {
+    if (user) {
       fetchCourses();
     }
-  }, [session]);
+  }, [user]);
 
   const fetchCourses = async () => {
     try {
@@ -42,6 +58,12 @@ export default function OfflinePage() {
   };
 
   const handleDownload = async (course) => {
+    // Check if free user has reached download limit
+    if (!premiumStatus.isPremium && offlineCourses.length >= 1) {
+      toast.error("Free users can download only 1 course. Upgrade to Premium for unlimited downloads!");
+      return;
+    }
+
     setDownloading(course.id);
     try {
       await downloadCourse(course);
@@ -77,6 +99,48 @@ export default function OfflinePage() {
           <h1 className="text-4xl font-bold">Offline Learning</h1>
           <p className="text-muted-foreground">Download courses and learn anywhere, anytime</p>
         </div>
+
+        {!premiumStatus.isPremium && (
+          <Card className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-2 border-yellow-500/30">
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center">
+                  <Crown className="h-6 w-6 text-black" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-xl mb-2">Free User Limitation</h3>
+                  <p className="text-muted-foreground mb-3">
+                    <strong className="text-orange-600">Free users can download only 1 course for offline access.</strong>
+                    {" "}Upgrade to Premium for unlimited offline downloads!
+                  </p>
+                  <div className="flex items-center gap-4 text-sm">
+                    <span className="font-semibold">
+                      Downloaded: {offlineCourses.length}/1
+                    </span>
+                    <Button
+                      onClick={() => router.push("/premium")}
+                      size="sm"
+                      className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+                    >
+                      Upgrade to Premium
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {premiumStatus.isPremium && (
+          <Card className="bg-gradient-to-r from-green-500/10 to-blue-500/10 border-2 border-green-500/30">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3 justify-center">
+                <Crown className="h-6 w-6 text-yellow-600" />
+                <span className="font-bold text-lg">Premium: Unlimited Offline Downloads!</span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Card className={isOnline ? "bg-green-50 dark:bg-green-950" : "bg-red-50 dark:bg-red-950"}>
           <CardContent className="pt-6">
@@ -129,12 +193,17 @@ export default function OfflinePage() {
                         <Button
                           size="sm"
                           onClick={() => handleDownload(course)}
-                          disabled={downloading === course.id || !isOnline}
+                          disabled={downloading === course.id || !isOnline || (!premiumStatus.isPremium && offlineCourses.length >= 1)}
                         >
                           {downloading === course.id ? (
                             <>
                               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                               Downloading...
+                            </>
+                          ) : !premiumStatus.isPremium && offlineCourses.length >= 1 ? (
+                            <>
+                              <Crown className="w-4 h-4 mr-2" />
+                              Premium Only
                             </>
                           ) : (
                             <>
@@ -161,7 +230,10 @@ export default function OfflinePage() {
           <Card>
             <CardHeader>
               <CardTitle>Downloaded Courses</CardTitle>
-              <CardDescription>Courses available offline ({offlineCourses.length})</CardDescription>
+              <CardDescription>
+                Courses available offline ({offlineCourses.length}
+                {!premiumStatus.isPremium && "/1"})
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {offlineCourses.length > 0 ? (
@@ -203,6 +275,8 @@ export default function OfflinePage() {
           <CardContent className="text-sm text-blue-800 dark:text-blue-200 space-y-2">
             <ul className="list-disc list-inside space-y-1">
               <li>Download courses while online to access them offline</li>
+              <li><strong>Free users: 1 course download limit</strong></li>
+              <li><strong>Premium users: Unlimited downloads</strong></li>
               <li>Your progress is saved locally when offline</li>
               <li>Data automatically syncs when you're back online</li>
               <li>Service Worker caches pages for faster loading</li>

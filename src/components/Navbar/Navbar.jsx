@@ -15,11 +15,13 @@ import {
   Code2,
   Youtube,
   BookOpen,
+  Crown,
 } from "lucide-react";
 import { CgDetailsMore } from "react-icons/cg";
 import { Sun, Moon } from "lucide-react";
 import Image from "next/image";
 import GoogleTranslate from "../GoogleTranslate";
+import PremiumGoogleTranslate from "../PremiumGoogleTranslate";
 import { useContext } from "react";
 import xpContext from "@/contexts/xp";
 import { AnimatePresence, motion } from "framer-motion";
@@ -33,6 +35,7 @@ const Navbar = () => {
   const [sidebar, setSidebar] = useState(false);
   const [theme, setTheme] = useState("light"); // Default theme: light
   const [streak, setStreak] = useState(0);
+  const [isPremium, setIsPremium] = useState(false);
   const { xp, show, changed } = useContext(xpContext);
   const router = useRouter();
   const pathname = usePathname();
@@ -60,8 +63,20 @@ const Navbar = () => {
   useEffect(() => {
     if (user?.email) {
       fetchStreak(user.email);
+      fetchPremiumStatus(user.email);
     }
   }, [user]);
+
+  // Function to fetch premium status
+  const fetchPremiumStatus = async (email) => {
+    try {
+      const res = await fetch(`/api/premium/status`);
+      const data = await res.json();
+      setIsPremium(data.isPremium || false);
+    } catch (error) {
+      console.error("Error fetching premium status:", error);
+    }
+  };
 
   // Function to fetch streak
   const fetchStreak = async (email) => {
@@ -282,7 +297,7 @@ const Navbar = () => {
                   <div className="mt-4 ml-4 pt-4 border-t border-slate-200/50">
                     <div className="py-2 px-3">
                       <p className="text-sm font-medium mb-2">Translate</p>
-                      <GoogleTranslate />
+                      <PremiumGoogleTranslate />
                     </div>
                   </div>
                 </nav>
@@ -330,6 +345,14 @@ const Navbar = () => {
                       <Link href="/contact">Contact</Link>
                     </li>
                   </ul>
+
+                  {/* Google Translate for non-logged in users */}
+                  <div className="mt-4 ml-4 pt-4 border-t border-slate-200/50">
+                    <div className="py-2 px-3">
+                      <p className="text-sm font-medium mb-2">Translate</p>
+                      <PremiumGoogleTranslate />
+                    </div>
+                  </div>
                 </nav>
               )}
             </div>
@@ -337,11 +360,16 @@ const Navbar = () => {
               <div className="flex items-center">
                 {user ? (
                   <div className="flex items-center">
-                    <Link href={"/profile"} onClick={() => setSidebar(false)}>
+                    <Link href={"/profile"} onClick={() => setSidebar(false)} className="relative">
                       <Avatar className={"w-7 mx-1 h-7"}>
                         <AvatarImage src={user?.image} alt={"logo"} />
                         <AvatarFallback>{user?.name?.[0].toUpperCase() || "U"}</AvatarFallback>
                       </Avatar>
+                      {isPremium && (
+                        <span className="absolute -bottom-1 -right-0 bg-yellow-500 text-black text-[8px] font-bold px-1 rounded">
+                          PRO
+                        </span>
+                      )}
                     </Link>
                     <Button
                       onClick={toggleTheme}
@@ -397,6 +425,16 @@ const Navbar = () => {
         <div className="flex items-center gap-2 sm:w-auto w-22 justify-center">
           {user && (
             <>
+              {isPremium && (
+                <Link
+                  href="/premium"
+                  className="flex gap-2 items-center rounded-2xl border-2 px-4 py-2 border-yellow-500/50 bg-yellow-50/50 dark:bg-yellow-950/20 hover:scale-105 transition-transform duration-200"
+                  title="Premium Member"
+                >
+                  <Crown className="h-4 w-4 text-yellow-600" />
+                  <span className="text-yellow-900 dark:text-yellow-400 font-bold max-sm:hidden">Premium</span>
+                </Link>
+              )}
               <div className="flex gap-2 items-center relative rounded-2xl border-2 px-4 py-2 border-green-500/50 bg-green-50/50 dark:bg-green-950/20">
                 <Sparkles className="h-4 w-4 text-green-500" />
                 <span className="text-green-900 dark:text-green-400 font-bold">
@@ -442,13 +480,18 @@ const Navbar = () => {
               {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
             </Button>
             {user ? (
-              <Link href={"/profile"} className="hover:scale-110 transition-transform duration-200">
+              <Link href={"/profile"} className="hover:scale-110 transition-transform duration-200 relative">
                 <Avatar className="w-8 h-8 ring-2 ring-blue-500/20 hover:ring-blue-500/40 transition-all duration-200">
                   <AvatarImage src={user?.image} alt={"logo"} />
                   <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
                     {user?.name ? user?.name[0].toUpperCase() : ""}
                   </AvatarFallback>
                 </Avatar>
+                {isPremium && (
+                  <span className="absolute -bottom-1 -right-1 bg-yellow-500 text-black text-[10px] font-bold px-1 rounded">
+                    PRO
+                  </span>
+                )}
               </Link>
             ) : (
               <Link href="/login">

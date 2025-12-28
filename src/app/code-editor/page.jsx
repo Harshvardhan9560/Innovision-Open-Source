@@ -1,11 +1,13 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Code, Play, Download, Sparkles, Globe } from "lucide-react";
+import { Code, Play, Download, Sparkles, Globe, Crown } from "lucide-react";
 import { toast } from "sonner";
 
 export default function CodeEditor() {
@@ -15,8 +17,31 @@ export default function CodeEditor() {
   const [websitePrompt, setWebsitePrompt] = useState("");
   const [generatedWebsite, setGeneratedWebsite] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [premiumStatus, setPremiumStatus] = useState({ isPremium: false });
+  const router = useRouter();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const fetchPremiumStatus = async () => {
+      if (user) {
+        try {
+          const res = await fetch("/api/premium/status");
+          const data = await res.json();
+          setPremiumStatus(data);
+        } catch (error) {
+          console.error("Error fetching premium status:", error);
+        }
+      }
+    };
+    fetchPremiumStatus();
+  }, [user]);
 
   const runCode = async () => {
+    if (!premiumStatus.isPremium) {
+      toast.error("Code execution is only available for Premium users. Please upgrade!");
+      return;
+    }
+
     toast.info("Running code...");
     try {
       const response = await fetch("/api/code/execute", {
@@ -32,6 +57,11 @@ export default function CodeEditor() {
   };
 
   const generateWebsite = async () => {
+    if (!premiumStatus.isPremium) {
+      toast.error("AI Website Builder is only available for Premium users. Please upgrade!");
+      return;
+    }
+
     if (!websitePrompt) {
       toast.error("Please enter a website description");
       return;
@@ -71,6 +101,28 @@ export default function CodeEditor() {
             Write, run, and test code in multiple languages or generate websites with AI
           </p>
         </div>
+
+        {!premiumStatus.isPremium && (
+          <div className="mb-6 p-4 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 rounded-lg">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center">
+                <Crown className="h-5 w-5 text-black" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg mb-1">Preview Only</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Code Editor and AI Website Builder are Premium features. Upgrade to run code and generate websites!
+                </p>
+                <Button
+                  onClick={() => router.push("/premium")}
+                  className="bg-yellow-500 hover:bg-yellow-600 text-black"
+                >
+                  Upgrade to Premium - ₹100/month
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <Tabs defaultValue="editor" className="w-full">
           <TabsList className="grid w-full grid-cols-2">

@@ -253,8 +253,8 @@ export default function TermsOfService() {
               </p>
               <p className="mb-2">
                 <strong>Support:</strong>{" "}
-                <a href="mailto:support@innovision.com" className="text-primary hover:underline">
-                  support@innovision.com
+                <a href="mailto:vikas.ambalazari@gmail.com" className="text-primary hover:underline">
+                  vikas.ambalazari@gmail.com
                 </a>
               </p>
               <p className="text-sm text-muted-foreground m-0">

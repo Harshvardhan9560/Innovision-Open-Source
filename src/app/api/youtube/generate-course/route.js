@@ -2,12 +2,32 @@ import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { adminDb, FieldValue } from "@/lib/firebase-admin";
 import { getServerSession } from "@/lib/auth-server";
+import { canGenerateYouTubeCourse } from "@/lib/premium";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 export async function POST(request) {
   try {
     const session = await getServerSession();
+
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Check if user can generate YouTube courses
+    const eligibility = await canGenerateYouTubeCourse(session.user.email);
+    if (!eligibility.canGenerate) {
+      return NextResponse.json(
+        {
+          error: eligibility.reason,
+          isPremium: eligibility.isPremium,
+          count: eligibility.count,
+          needsUpgrade: !eligibility.isPremium,
+        },
+        { status: 403 }
+      );
+    }
+
     const { title, summary, transcript } = await request.json();
 
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
@@ -47,13 +67,18 @@ Return as JSON matching this structure:
       throw new Error("Failed to generate course");
     }
 
-    // Save to Firebase
-    const docRef = await adminDb.collection("roadmaps").add({
-      ...courseData,
-      source: "youtube",
-      createdAt: new Date().toISOString(),
-      process: "completed",
-    });
+    // Save to Firebase under user's youtube-courses collection
+    const docRef = await adminDb
+      .collection("users")
+      .doc(session.user.email)
+      .collection("youtube-courses")
+      .add({
+        ...courseData,
+        source: "youtube",
+        videoTitle: title,
+        createdAt: new Date().toISOString(),
+        process: "completed",
+      });
 
     // Award 10 XP for generating a course
     if (session?.user?.email) {

@@ -3,6 +3,7 @@ import { getServerSession } from "@/lib/auth-server";
 import { adminDb, FieldValue } from "@/lib/firebase-admin";
 import { nanoid } from "nanoid";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { canGenerateCourse } from "@/lib/premium";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({
@@ -188,20 +189,7 @@ Topic: ${prompt}
   }
 }
 
-async function checkEligible(session) {
-  try {
-    const q = adminDb
-      .collection("users")
-      .doc(session.user.email)
-      .collection("roadmaps")
-      .where("process", "==", "completed");
-    const snapshot = await q.get();
-    return snapshot.size < 6;
-  } catch (error) {
-    console.error("Eligibility check failed:", error);
-    return false;
-  }
-}
+// Removed - now using canGenerateCourse from premium.js
 
 export async function POST(req) {
   try {
@@ -220,10 +208,16 @@ export async function POST(req) {
       return NextResponse.json({ message: "Prompt too long. Maximum 1500 characters." }, { status: 400 });
     }
 
-    const isEligible = await checkEligible(session);
-    if (!isEligible) {
+    // Check if user can generate more courses based on premium status
+    const eligibility = await canGenerateCourse(session.user.email);
+    if (!eligibility.canGenerate) {
       return NextResponse.json(
-        { message: "You already have 6 courses. Delete one to create a new one." },
+        { 
+          message: eligibility.reason,
+          isPremium: eligibility.isPremium,
+          courseCount: eligibility.courseCount,
+          needsUpgrade: !eligibility.isPremium
+        },
         { status: 403 }
       );
     }

@@ -6,27 +6,48 @@ import AnalyticsDashboard from "@/components/dashboard/AnalyticsDashboard";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import PremiumDialog from "@/components/PremiumDialog";
 
 export default function AnalyticsPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [isInstructor, setIsInstructor] = useState(false);
+  const [premiumStatus, setPremiumStatus] = useState({ isPremium: false });
+  const [showPremiumDialog, setShowPremiumDialog] = useState(false);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    const fetchPremiumStatus = async () => {
+      if (user) {
+        try {
+          const res = await fetch("/api/premium/status");
+          const data = await res.json();
+          setPremiumStatus(data);
+
+          if (!data.isPremium) {
+            setShowPremiumDialog(true);
+          }
+        } catch (error) {
+          console.error("Error fetching premium status:", error);
+        }
+      }
+    };
+    fetchPremiumStatus();
+  }, [user]);
+
+  useEffect(() => {
+    if (!user && !loading) {
       router.push("/login");
     }
-    // Check if user has instructor role (you can implement this check)
     if (user) {
-      setIsInstructor(true); // For now, all users can access
+      setIsInstructor(true);
     }
-  }, [status, router, session]);
+  }, [user, loading, router]);
 
   if (loading) {
     return <div className="p-8">Loading...</div>;
   }
 
-  if (!session) {
+  if (!user) {
     return null;
   }
 
@@ -41,9 +62,22 @@ export default function AnalyticsPage() {
             </Button>
           </Link>
         </div>
-        
-        {isInstructor ? (
-          <AnalyticsDashboard instructorId={session.user.email} />
+
+        <PremiumDialog
+          open={showPremiumDialog}
+          onOpenChange={setShowPremiumDialog}
+          feature="Analytics Dashboard"
+        />
+
+        {isInstructor && premiumStatus.isPremium ? (
+          <AnalyticsDashboard instructorId={user.email} />
+        ) : !premiumStatus.isPremium ? (
+          <div className="text-center p-12">
+            <h2 className="text-2xl font-bold mb-4">Premium Feature</h2>
+            <p className="text-muted-foreground">
+              Analytics Dashboard is only available for Premium users.
+            </p>
+          </div>
         ) : (
           <div className="text-center p-12">
             <h2 className="text-2xl font-bold mb-4">Instructor Access Required</h2>

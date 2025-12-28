@@ -29,10 +29,10 @@ export default function CreateProjectPage() {
   const [projectLoading, setProjectLoading] = useState(false);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (!user && !loading) {
       router.push("/login");
     }
-  }, [status, router]);
+  }, [user, loading, router]);
 
   useEffect(() => {
     if (templateId) {

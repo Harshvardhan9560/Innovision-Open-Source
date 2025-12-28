@@ -71,6 +71,7 @@ export default function Page() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("custom");
   const [openCollege, setOpenCollege] = useState(false);
+  const [premiumStatus, setPremiumStatus] = useState({ isPremium: false, courseCount: 0, maxCourses: 3 });
   const [engineeringData, setEngineeringData] = useState({
     college: "",
     branch: "",
@@ -89,6 +90,22 @@ export default function Page() {
   const { user } = useAuth();
   const router = useRouter();
   const { showLoader } = loader();
+
+  // Fetch premium status on mount
+  useEffect(() => {
+    const fetchPremiumStatus = async () => {
+      if (user) {
+        try {
+          const res = await fetch("/api/premium/status");
+          const data = await res.json();
+          setPremiumStatus(data);
+        } catch (error) {
+          console.error("Error fetching premium status:", error);
+        }
+      }
+    };
+    fetchPremiumStatus();
+  }, [user]);
 
   // Get available subjects based on selected branch and semester
   const availableSubjects =
@@ -133,6 +150,12 @@ export default function Page() {
   }, [curriculumData, availableCurriculumSubjects]);
 
   const handleCurriculumSubmit = async () => {
+    // Check premium status for curriculum generation
+    if (!premiumStatus.isPremium) {
+      toast.error("Curriculum generation is only available for Premium users. Upgrade to access!");
+      return;
+    }
+
     if (!curriculumData.classLevel || !curriculumData.board) {
       toast.error("Please select class and board");
       return;
@@ -226,6 +249,12 @@ export default function Page() {
   };
 
   const handleEngineeringSubmit = async () => {
+    // Check premium status for engineering generation
+    if (!premiumStatus.isPremium) {
+      toast.error("Engineering course generation is only available for Premium users. Upgrade to access!");
+      return;
+    }
+
     if (!engineeringData.college || !engineeringData.branch || !engineeringData.semester || !engineeringData.subject) {
       toast.error("Please fill all required fields");
       return;
@@ -499,10 +528,16 @@ Return valid JSON only.`;
             <TabsTrigger value="curriculum" className="flex items-center gap-2">
               <BookOpen className="h-4 w-4" />
               Curriculum
+              {!premiumStatus.isPremium && (
+                <span className="ml-1 text-xs bg-yellow-500 text-black px-1.5 py-0.5 rounded">PRO</span>
+              )}
             </TabsTrigger>
             <TabsTrigger value="engineering" className="flex items-center gap-2">
               <GraduationCap className="h-4 w-4" />
               Engineering
+              {!premiumStatus.isPremium && (
+                <span className="ml-1 text-xs bg-yellow-500 text-black px-1.5 py-0.5 rounded">PRO</span>
+              )}
             </TabsTrigger>
           </TabsList>
 
@@ -638,6 +673,27 @@ Return valid JSON only.`;
 
           <TabsContent value="curriculum">
             <Card className="p-6 border-0 shadow-none">
+              {!premiumStatus.isPremium && (
+                <div className="mb-6 p-4 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center">
+                      <span className="text-black font-bold text-lg">★</span>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-lg mb-1">Premium Feature</h3>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Curriculum generation is available only for Premium users. Upgrade now for just ₹100/month!
+                      </p>
+                      <Button
+                        onClick={() => router.push("/premium")}
+                        className="bg-yellow-500 hover:bg-yellow-600 text-black"
+                      >
+                        Upgrade to Premium
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="space-y-6">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
@@ -810,6 +866,27 @@ Return valid JSON only.`;
 
           <TabsContent value="engineering">
             <Card className="p-6 border-0 shadow-none">
+              {!premiumStatus.isPremium && (
+                <div className="mb-6 p-4 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center">
+                      <span className="text-black font-bold text-lg">★</span>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-lg mb-1">Premium Feature</h3>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Engineering course generation is available only for Premium users. Upgrade now for just ₹100/month!
+                      </p>
+                      <Button
+                        onClick={() => router.push("/premium")}
+                        className="bg-yellow-500 hover:bg-yellow-600 text-black"
+                      >
+                        Upgrade to Premium
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="space-y-6">
                 {/* College and Branch Selection */}
                 <div className="grid gap-4 md:grid-cols-2">

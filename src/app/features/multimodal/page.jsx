@@ -6,9 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Loader2, Video, Mic, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Loader2, Video, Mic, Image as ImageIcon, Construction } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import PremiumDialog from "@/components/PremiumDialog";
 
 export default function MultimodalPage() {
   const { user, loading } = useAuth();
@@ -17,16 +18,39 @@ export default function MultimodalPage() {
   const [contentType, setContentType] = useState("audio");
   const [pageLoading, setPageLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [premiumStatus, setPremiumStatus] = useState({ isPremium: false });
+  const [showPremiumDialog, setShowPremiumDialog] = useState(false);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    const fetchPremiumStatus = async () => {
+      if (user) {
+        try {
+          const res = await fetch("/api/premium/status");
+          const data = await res.json();
+          setPremiumStatus(data);
+        } catch (error) {
+          console.error("Error fetching premium status:", error);
+        }
+      }
+    };
+    fetchPremiumStatus();
+  }, [user]);
+
+  useEffect(() => {
+    if (!user && !loading) {
       router.push("/login");
     }
-  }, [status, router]);
+  }, [user, loading, router]);
 
   const generateContent = async () => {
     if (!content.trim()) {
       toast.error("Please enter some content");
+      return;
+    }
+
+    // Show premium dialog for non-premium users trying to generate
+    if (!premiumStatus.isPremium) {
+      setShowPremiumDialog(true);
       return;
     }
 
@@ -85,10 +109,42 @@ export default function MultimodalPage() {
 
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold">Multimodal Content Generation</h1>
-          <p className="text-muted-foreground">
-            Transform your course content into audio scripts and video storyboards
-          </p>
+          <p className="text-muted-foreground">Generate audio scripts and video storyboards</p>
         </div>
+
+        {/* Coming Soon Banner */}
+        <Card className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-2 border-purple-500/30">
+          <CardContent className="pt-6">
+            <div className="text-center space-y-3">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-500 rounded-full mb-2">
+                <Video className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="font-bold text-2xl flex items-center justify-center gap-2">
+                <Construction className="h-6 w-6 text-orange-500" />
+                Coming Soon - Preview Only
+                <Construction className="h-6 w-6 text-orange-500" />
+              </h3>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                We're actively working on multimodal content generation! This feature is currently in development.
+                Free users can preview the interface, but full functionality will be available only for Premium users once launched.
+              </p>
+              <div className="flex items-center justify-center gap-4 pt-2">
+                <span className="px-3 py-1 bg-purple-500 text-white text-sm font-semibold rounded-full">
+                  In Development
+                </span>
+                <span className="px-3 py-1 bg-yellow-500 text-black text-sm font-semibold rounded-full">
+                  Premium Feature
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <PremiumDialog 
+          open={showPremiumDialog} 
+          onOpenChange={setShowPremiumDialog}
+          feature="Multimodal Content Generation"
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>

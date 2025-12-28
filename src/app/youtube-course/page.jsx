@@ -1,17 +1,42 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Youtube, Loader2, BookOpen, CheckCircle } from "lucide-react";
+import { Youtube, Loader2, BookOpen, CheckCircle, Crown } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/auth";
 
 export default function YouTubeCourse() {
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState("");
+  const [premiumStatus, setPremiumStatus] = useState({ isPremium: false, count: 0 });
   const router = useRouter();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const fetchPremiumStatus = async () => {
+      if (user) {
+        try {
+          const res = await fetch("/api/premium/status");
+          const data = await res.json();
+          setPremiumStatus(data);
+          
+          // Also fetch YouTube course count
+          const ytRes = await fetch("/api/youtube/status");
+          if (ytRes.ok) {
+            const ytData = await ytRes.json();
+            setPremiumStatus(prev => ({ ...prev, count: ytData.count || 0 }));
+          }
+        } catch (error) {
+          console.error("Error fetching premium status:", error);
+        }
+      }
+    };
+    fetchPremiumStatus();
+  }, [user]);
 
   const generateCourse = async () => {
     if (!youtubeUrl) {
@@ -107,6 +132,28 @@ Generate a structured course with chapters covering all the topics discussed in 
             Convert any YouTube video into a structured learning course
           </p>
         </div>
+
+        {!premiumStatus.isPremium && (
+          <div className="mb-6 p-4 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 rounded-lg">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center">
+                <Crown className="h-5 w-5 text-black" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg mb-1">Free User Limit</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Free users can generate 1 YouTube course. You've used {premiumStatus.count || 0}/1. Upgrade to Premium for unlimited access!
+                </p>
+                <Button
+                  onClick={() => router.push("/premium")}
+                  className="bg-yellow-500 hover:bg-yellow-600 text-black"
+                >
+                  Upgrade to Premium - ₹100/month
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <Card>
           <CardHeader>

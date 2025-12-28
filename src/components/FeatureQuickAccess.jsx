@@ -14,8 +14,7 @@ export default function FeatureQuickAccess() {
       icon: Palette,
       color: "text-purple-500",
       bgColor: "bg-purple-50",
-      href: "/studio",
-      emoji: "🎨"
+      href: "/studio"
     },
     {
       title: "Gamification",
@@ -23,8 +22,7 @@ export default function FeatureQuickAccess() {
       icon: Trophy,
       color: "text-yellow-500",
       bgColor: "bg-yellow-50",
-      href: "/gamification",
-      emoji: "🏆"
+      href: "/gamification"
     },
     {
       title: "Curriculum Browser",
@@ -32,8 +30,7 @@ export default function FeatureQuickAccess() {
       icon: BookOpen,
       color: "text-blue-500",
       bgColor: "bg-blue-50",
-      href: "/curriculum",
-      emoji: "📚"
+      href: "/curriculum"
     },
     {
       title: "Generate Course",
@@ -41,8 +38,7 @@ export default function FeatureQuickAccess() {
       icon: Sparkles,
       color: "text-green-500",
       bgColor: "bg-green-50",
-      href: "/generate",
-      emoji: "✨"
+      href: "/generate"
     }
   ];
 
@@ -58,7 +54,7 @@ export default function FeatureQuickAccess() {
           >
             <CardHeader>
               <div className={`w-12 h-12 rounded-lg ${feature.bgColor} flex items-center justify-center mb-2`}>
-                <span className="text-2xl">{feature.emoji}</span>
+                <Icon className={`h-6 w-6 ${feature.color}`} />
               </div>
               <CardTitle className="text-lg">{feature.title}</CardTitle>
               <CardDescription>{feature.description}</CardDescription>

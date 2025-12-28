@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/auth";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { 
   BookOpen, Plus, Save, Eye, Upload, FileText, 
-  Link as LinkIcon, Trash2 
+  Link as LinkIcon, Trash2, Crown
 } from "lucide-react";
 import { toast } from "sonner";
 import WYSIWYGEditor from "@/components/studio/WYSIWYGEditor";
@@ -28,6 +29,7 @@ import ResourceManager from "@/components/studio/ResourceManager";
 
 export default function StudioPage() {
   const { user } = useAuth();
+  const router = useRouter();
   const [courseTitle, setCourseTitle] = useState("");
   const [courseDescription, setCourseDescription] = useState("");
   const [chapters, setChapters] = useState([]);
@@ -41,6 +43,22 @@ export default function StudioPage() {
   const [editorMode, setEditorMode] = useState("edit"); // "edit" or "preview"
   const [editingCourseId, setEditingCourseId] = useState(null); // Track if editing existing course
   const [previewChapter, setPreviewChapter] = useState(null); // Track which chapter to preview
+  const [premiumStatus, setPremiumStatus] = useState({ isPremium: false, count: 0 });
+
+  useEffect(() => {
+    const fetchPremiumStatus = async () => {
+      if (user) {
+        try {
+          const res = await fetch("/api/premium/status");
+          const data = await res.json();
+          setPremiumStatus(data);
+        } catch (error) {
+          console.error("Error fetching premium status:", error);
+        }
+      }
+    };
+    fetchPremiumStatus();
+  }, [user]);
 
   const handleSaveDraft = async () => {
     if (!courseTitle) {
@@ -181,10 +199,10 @@ export default function StudioPage() {
   };
 
   useEffect(() => {
-    if (session && activeTab === "courses") {
+    if (user && activeTab === "courses") {
       fetchPublishedCourses();
     }
-  }, [session, activeTab]);
+  }, [user, activeTab]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -194,6 +212,28 @@ export default function StudioPage() {
           <h1 className="text-4xl font-bold mb-2">Instructor Authoring Studio</h1>
           <p className="text-muted-foreground">Create and edit courses with AI assistance</p>
         </div>
+
+        {!premiumStatus.isPremium && (
+          <div className="mb-6 p-4 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 rounded-lg">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center">
+                <Crown className="h-5 w-5 text-black" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg mb-1">Studio Preview Mode</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Free users can create 1 Studio course for testing. Upgrade to Premium for unlimited course creation and full design capabilities!
+                </p>
+                <Button
+                  onClick={() => router.push("/premium")}
+                  className="bg-yellow-500 hover:bg-yellow-600 text-black"
+                >
+                  Upgrade to Premium - ₹100/month
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Sidebar - Course Info */}
