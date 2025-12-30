@@ -1,185 +1,333 @@
-# InnoVision : Adaptive Learning Interface
+<p align="center">
+  <img src="./public/InnoVision_LOGO-removebg-preview.png" alt="InnoVision Logo" width="200"/>
+</p>
 
-![InnoVision Logo](./public/InnoVision_LOGO-removebg-preview.png)
+<h1 align="center">InnoVision - AI-Powered Adaptive Learning Platform</h1>
 
-## 📚 Introduction
+<p align="center">
+  <strong>Revolutionizing Education Through Intelligent & Personalized Learning</strong>
+</p>
 
-InnoVision is committed to revolutionizing education through intelligent and personalized learning. Our platform breaks the limitations of traditional courses by dynamically generating structured, engaging courses from any user-defined topic. By leveraging AI and machine learning, we create a flexible and adaptive learning environment that tailors content to individual needs.
+<p align="center">
+  <a href="https://innovision7.live">Live Demo</a> •
+  <a href="#features">Features</a> •
+  <a href="#tech-stack">Tech Stack</a> •
+  <a href="#installation">Installation</a> •
+  <a href="#pricing">Pricing</a>
+</p>
 
-With innovation, flexibility, and logical reasoning (InnoVision) as our core principles, we are shaping the future of personalized learning!
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js" alt="Next.js"/>
+  <img src="https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react" alt="React"/>
+  <img src="https://img.shields.io/badge/Firebase-orange?style=for-the-badge&logo=firebase" alt="Firebase"/>
+  <img src="https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css" alt="Tailwind"/>
+  <img src="https://img.shields.io/badge/Google-Gemini-4285F4?style=for-the-badge&logo=google" alt="Gemini"/>
+  <img src="https://img.shields.io/badge/Razorpay-02042B?style=for-the-badge&logo=razorpay" alt="Razorpay"/>
+</p>
+
+---
+
+## 📚 About InnoVision
+
+InnoVision is a cutting-edge AI-powered learning platform that dynamically generates structured, engaging courses from any topic. Our platform breaks the limitations of traditional courses by leveraging AI and machine learning to create a flexible and adaptive learning environment tailored to individual needs.
+
+**Core Principles:** Innovation • Flexibility • Logical Reasoning
+
+**Live Website:** [https://innovision7.live](https://innovision7.live)
+
+**GitHub Repository:** [https://github.com/ItsVikasA/InnoVision](https://github.com/ItsVikasA/InnoVision)
+
+---
 
 ## ✨ Features
 
-- **🎯 Dynamic Course Generation**: Users can input any concept, skill, or topic, and the system will generate a structured course
-- **🤖 AI-Powered Learning Paths**: Uses Large Language Models (LLM) to create step-by-step roadmaps, organizing content into chapters
-- **🎮 Interactive Task Implementation**: Platform integrates various interactive task templates (Quiz, Fill-ups, Match) to enhance engagement
-- **⚡ Automated Task Selection**: AI selects the most suitable interactive tasks for each chapter, ensuring optimized learning experience
-- **📋 Structured JSON Parsing**: Course content is formatted in JSON and seamlessly parsed to generate complete, customized courses
-- **🔄 Adaptive Learning Experience**: Courses adjust based on user input, ensuring flexible and tailored learning journeys
-- **👤 User Authentication**: Secure login with Google and GitHub OAuth
-- **📊 Progress Tracking**: Track learning progress, XP points, and achievements
-- **📧 Contact System**: Integrated contact form with EmailJS for user communication
+### 🎯 Course Generation
+| Feature | Description |
+|---------|-------------|
+| **Custom Course Generation** | Generate structured courses on ANY topic using Google Gemini AI |
+| **YouTube Course Generation** | Create courses from YouTube video content automatically |
+| **Studio Courses** | Design and create custom courses with our studio tools |
+| **Content Ingestion** | Import PDFs, textbooks, and documents to generate courses |
+| **Curriculum Browser** | Access pre-built curriculum from LKG to Class 12 (CBSE & State Boards) |
+| **Engineering Courses** | Specialized courses for all engineering branches and semesters |
 
-## 🛠️ Technologies Used
+### 📖 Learning Experience
+| Feature | Description |
+|---------|-------------|
+| **Interactive Tasks** | Quiz (MCQ), Fill-in-the-blanks, Match the Following for each chapter |
+| **AI-Powered Roadmaps** | Step-by-step learning paths organized into 8-12 chapters |
+| **Chapter Tests** | Assess understanding with chapter-wise tests |
+| **Progress Tracking** | Track completion percentage, XP points, and learning streaks |
+| **Offline Learning** | Download courses for offline access using IndexedDB |
+| **Multi-language Translation** | Learn in your preferred language with real-time translation |
 
-- **⚡ Next.js 15** - React framework with App Router for optimal performance and SEO
-- **🎨 Tailwind CSS** - Utility-first CSS framework for responsive design
-- **🎭 Shadcn/UI** - Modern and accessible UI component library
-- **🔥 Firebase** - Backend services for database management and real-time data
-- **🔐 Auth.js (NextAuth v5)** - Secure authentication with OAuth providers
-- **🤖 Google Gemini API** - AI-powered content generation
-- **📧 EmailJS** - Contact form email service
-- **🎯 React Icons** - Comprehensive icon library
-- **📱 Framer Motion** - Animation library for smooth interactions
+### 🎮 Gamification System
+| Feature | Description |
+|---------|-------------|
+| **XP Points** | Earn 2 XP for each correct answer, track total XP |
+| **Learning Streaks** | Maintain daily learning streaks for consistent study |
+| **Badges & Achievements** | Unlock badges for milestones and achievements |
+| **Leaderboard** | Compete with other learners, see your ranking |
+| **Daily Challenges** | Complete daily tasks for bonus XP rewards |
+| **Skill Tree** | Visual progression of skills mastered |
 
-## 🚀 Quick Start
+### 🚀 Advanced Features
+| Feature | Description |
+|---------|-------------|
+| **Analytics Dashboard** | Track performance metrics, XP graphs, learning insights |
+| **AI Personalization** | Smart recommendations based on learning style |
+| **Code Editor** | Built-in code editor with AI assistance |
+| **AI Website Builder** | Create websites with AI guidance |
+| **LMS Integration** | Connect with Moodle and Canvas |
+| **Multimodal Content** | Generate audio scripts and video storyboards |
+| **7-Day Free Trial** | Full access to premium features for 7 days |
+
+### 🔐 Platform Features
+| Feature | Description |
+|---------|-------------|
+| **Google Authentication** | Secure login with Google OAuth 2.0 |
+| **PRO Badge** | Premium users get PRO badge next to profile |
+| **Dark/Light Mode** | Theme switching for comfortable viewing |
+| **Responsive Design** | Works on desktop, tablet, and mobile |
+| **PWA Support** | Install as a Progressive Web App |
+| **Real-time Sync** | Data syncs across devices via Firebase |
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| Next.js | 15 | React framework with App Router & Turbopack |
+| React | 19 | UI library for component-based development |
+| Tailwind CSS | 4 | Utility-first CSS framework |
+| Shadcn/UI | Latest | Modern, accessible UI components |
+| Framer Motion | Latest | Animation library |
+| Recharts | Latest | Charts and data visualization |
+| Lucide React | Latest | Icon library |
+
+### Backend & Database
+| Technology | Purpose |
+|------------|---------|
+| Firebase Firestore | NoSQL document database |
+| Firebase Auth | User authentication with Google OAuth |
+| Firebase Storage | Media and document storage |
+| Next.js API Routes | Backend API endpoints |
+| Firebase Admin SDK | Server-side Firebase operations |
+
+### AI & Services
+| Technology | Purpose |
+|------------|---------|
+| Google Gemini API | AI-powered course content generation |
+| Razorpay | Payment gateway for subscriptions |
+| EmailJS | Contact form email service |
+| IndexedDB (idb) | Offline data storage |
+
+---
+
+## 💰 Pricing Plans
+
+### Free Plan - ₹0/forever
+- 3 custom courses
+- 1 YouTube course
+- 1 Studio course
+- 1 offline download
+- Basic gamification
+- 7-day free trial of premium features
+
+### Premium Plan - ₹100/month
+- ✅ Unlimited custom courses
+- ✅ Unlimited YouTube courses
+- ✅ Unlimited Studio courses
+- ✅ Full curriculum access (LKG-12)
+- ✅ Engineering courses (all branches)
+- ✅ Content Ingestion (PDFs/textbooks)
+- ✅ Code Editor & AI Builder
+- ✅ Multi-language translation
+- ✅ Analytics Dashboard
+- ✅ AI Personalization
+- ✅ Unlimited offline downloads
+- ✅ LMS Integration
+- ✅ Priority support
+- ✅ PRO badge
+
+### Education Plan - ₹50/month (50% OFF)
+- ✅ All Premium features
+- ✅ For schools, colleges & students
+- ✅ Valid .edu email required
+- ✅ Student ID verification
+- ✅ Classroom integration
+- ✅ Bulk licensing available
+
+---
+
+## 🚀 Installation
 
 ### Prerequisites
-
-- Node.js 18+ 
+- Node.js 18+
 - npm, yarn, pnpm, or bun
 - Git
 
-### 📥 Installation
+### Quick Start
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/ItsVikasA/Innovision.git
-   cd Innovision
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   # or
-   yarn install
-   # or
-   pnpm install
-   ```
-
-3. **Set up environment variables**
-   
-   Create a `.env.local` file in the root directory and add the following variables:
-
-   ```env
-   # NextAuth Configuration
-   NEXTAUTH_SECRET=your-nextauth-secret-key
-   NEXTAUTH_URL=http://localhost:3000
-
-   # OAuth Providers
-   GITHUB_ID=your-github-oauth-client-id
-   GITHUB_SECRET=your-github-oauth-client-secret
-   GOOGLE_CLIENT_ID=your-google-oauth-client-id
-   GOOGLE_CLIENT_SECRET=your-google-oauth-client-secret
-
-   # Firebase Configuration
-   FIREBASE_API_KEY=your-firebase-api-key
-   AUTH_DOMAIN=your-project.firebaseapp.com
-   PROJECT_ID=your-firebase-project-id
-   STORAGE_BUCKET=your-project.appspot.com
-   MESSAGING_SENDER_ID=your-messaging-sender-id
-   APP_ID=your-firebase-app-id
-   MEASUREMENT_ID=your-measurement-id
-
-   # AI Service
-   GEMINI_API_KEY=your-google-gemini-api-key
-
-   # Email Service (EmailJS)
-   NEXT_PUBLIC_EMAILJS_SERVICE_ID=your-emailjs-service-id
-   NEXT_PUBLIC_EMAILJS_TEMPLATE_ID=your-emailjs-template-id
-   NEXT_PUBLIC_EMAILJS_USER_ID=your-emailjs-user-id
-   ```
-
-4. **Run the development server**
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   # or
-   pnpm dev
-   # or
-   bun dev
-   ```
-
-5. **Open your browser**
-   
-   Navigate to [http://localhost:3000](http://localhost:3000) to see the application.
-
-## 🔧 Environment Variables Setup Guide
-
-### 🔑 Authentication Setup
-
-#### NextAuth Secret
-Generate a secure random string:
 ```bash
-openssl rand -base64 32
+# Clone the repository
+git clone https://github.com/ItsVikasA/InnoVision.git
+cd InnoVision
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env.local
+# Edit .env.local with your credentials
+
+# Run development server
+npm run dev
 ```
 
-#### GitHub OAuth
-1. Go to [GitHub Developer Settings](https://github.com/settings/developers)
-2. Create a new OAuth App
-3. Set Authorization callback URL: `http://localhost:3000/api/auth/callback/github`
-4. Copy Client ID and Client Secret
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-#### Google OAuth
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select existing
-3. Enable Google+ API
-4. Create OAuth 2.0 credentials
-5. Add authorized redirect URI: `http://localhost:3000/api/auth/callback/google`
+### Environment Variables
 
-### 🔥 Firebase Setup
-1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Create a new project
-3. Add a web app to your project
-4. Copy the configuration values
-5. Enable Firestore Database
-6. Set up authentication methods
+Create a `.env.local` file with the following variables:
 
-### 🤖 Google Gemini API
-1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Create an API key
-3. Copy the key for `GEMINI_API_KEY`
+```env
+# Firebase Configuration
+NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
 
-### 📧 EmailJS Setup
-1. Go to [EmailJS](https://www.emailjs.com/)
-2. Create an account and add an email service
-3. Create an email template
-4. Get Service ID, Template ID, and User ID from dashboard
+# Firebase Admin (Server-side)
+FIREBASE_ADMIN_PROJECT_ID=your-project-id
+FIREBASE_ADMIN_CLIENT_EMAIL=your-service-account-email
+FIREBASE_ADMIN_PRIVATE_KEY="your-private-key"
+
+# Google OAuth
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+# AI Services
+GEMINI_API_KEY=your-gemini-api-key
+
+# Razorpay (Payments)
+RAZORPAY_KEY_ID=rzp_test_xxxxx
+RAZORPAY_KEY_SECRET=your-secret-key
+NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_xxxxx
+
+# EmailJS
+NEXT_PUBLIC_EMAILJS_SERVICE_ID=your-service-id
+NEXT_PUBLIC_EMAILJS_TEMPLATE_ID=your-template-id
+NEXT_PUBLIC_EMAILJS_USER_ID=your-user-id
+
+# NextAuth
+NEXTAUTH_SECRET=your-nextauth-secret
+NEXTAUTH_URL=http://localhost:3000
+```
+
+---
 
 ## 📁 Project Structure
 
 ```
 InnoVision/
-├── public/                     # Static assets
+├── public/                    # Static assets & PWA files
+│   └── service-worker.js      # PWA service worker
 ├── src/
 │   ├── app/                   # Next.js App Router
-│   │   ├── api/              # API routes
-│   │   ├── auth/             # Authentication pages
-│   │   ├── contact/          # Contact page
-│   │   ├── generate/         # Course generation
-│   │   ├── profile/          # User profile
-│   │   └── roadmap/          # Learning roadmaps
-│   ├── components/           # Reusable UI components
-│   │   ├── ui/              # Shadcn UI components
-│   │   ├── Landing/         # Landing page components
-│   │   ├── Tasks/           # Interactive task components
-│   │   └── dashboard/       # Dashboard components
-│   ├── contexts/            # React contexts
-│   ├── hooks/               # Custom React hooks
-│   └── lib/                 # Utility functions and configs
-├── components.json          # Shadcn UI configuration
-├── next.config.mjs         # Next.js configuration
-├── package.json            # Dependencies and scripts
-├── tailwind.config.js      # Tailwind CSS configuration
-└── README.md               # This file
+│   │   ├── api/               # API routes
+│   │   │   ├── gamification/  # XP, streaks, badges APIs
+│   │   │   ├── premium/       # Subscription & Razorpay APIs
+│   │   │   ├── roadmap/       # Course management APIs
+│   │   │   ├── getuser/       # User data API
+│   │   │   ├── getrank/       # Leaderboard API
+│   │   │   └── ...
+│   │   ├── analytics/         # Analytics dashboard
+│   │   ├── chapter-test/      # Chapter tests
+│   │   ├── code-editor/       # Code editor page
+│   │   ├── content-ingestion/ # PDF/document import
+│   │   ├── courses/           # Course listing
+│   │   ├── curriculum/        # Curriculum browser (LKG-12)
+│   │   ├── features/          # Advanced features
+│   │   │   ├── analytics/     # Analytics feature
+│   │   │   ├── lms/           # LMS integration
+│   │   │   ├── multimodal/    # Audio/video generation
+│   │   │   ├── offline/       # Offline learning
+│   │   │   ├── personalization/ # AI personalization
+│   │   │   └── projects/      # Project-based learning
+│   │   ├── gamification/      # Gamification dashboard
+│   │   ├── generate/          # Course generation
+│   │   ├── premium/           # Premium subscription page
+│   │   ├── profile/           # User profile & dashboard
+│   │   ├── roadmap/           # Learning roadmaps
+│   │   ├── studio/            # Course studio
+│   │   ├── studio-course/     # Studio course viewer
+│   │   └── youtube-course/    # YouTube course generator
+│   ├── components/            # Reusable components
+│   │   ├── chapter_content/   # Chapter display components
+│   │   ├── dashboard/         # Dashboard & Sidebar
+│   │   ├── gamification/      # XP, Streaks, Leaderboard
+│   │   ├── Landing/           # Landing page components
+│   │   ├── Navbar/            # Navigation & Logout
+│   │   ├── profile/           # Profile components
+│   │   ├── Tasks/             # Quiz, Fill-ups, Match
+│   │   └── ui/                # Shadcn UI components
+│   ├── contexts/              # React contexts (Auth, XP)
+│   ├── hooks/                 # Custom React hooks
+│   └── lib/                   # Utilities (Firebase, Auth, Premium)
+├── .env.local                 # Environment variables
+├── next.config.mjs            # Next.js configuration
+├── package.json               # Dependencies
+└── tailwind.config.js         # Tailwind configuration
 ```
 
-## 🔨 Available Scripts
+---
+
+## 🔌 API Routes
+
+### Course Management
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/roadmap/all` | GET | Get all user courses |
+| `/api/roadmap/[id]` | GET | Get specific course |
+| `/api/generate` | POST | Generate new course |
+| `/api/youtube/generate` | POST | Generate course from YouTube |
+| `/api/studio/create` | POST | Create studio course |
+
+### Gamification
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/gamification/stats` | GET | Get user gamification stats |
+| `/api/gamification/xp` | POST | Award XP points |
+| `/api/gamification/streak` | GET/POST | Get/Update streak |
+| `/api/gamification/badges` | GET | Get user badges |
+| `/api/gamification/leaderboard` | GET | Get leaderboard |
+
+### Premium & Payments
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/premium/status` | GET | Check premium status |
+| `/api/premium/create-order` | POST | Create Razorpay order |
+| `/api/premium/verify-payment` | POST | Verify payment |
+
+### User
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/getuser` | GET | Get user profile data |
+| `/api/getrank` | GET | Get user rank & leaderboard |
+| `/api/auth/session` | POST/DELETE | Manage auth session |
+
+---
+
+## 🔨 Scripts
 
 ```bash
 # Development
-npm run dev          # Start development server with Turbopack
+npm run dev          # Start dev server with Turbopack
 
 # Production
 npm run build        # Build for production
@@ -189,48 +337,85 @@ npm run start        # Start production server
 npm run lint         # Run ESLint
 ```
 
+---
+
 ## 🌐 Deployment
 
 ### Vercel (Recommended)
-1. Push your code to GitHub
-2. Connect your repository to [Vercel](https://vercel.com)
+1. Push code to GitHub
+2. Connect repository to [Vercel](https://vercel.com)
 3. Add environment variables in Vercel dashboard
 4. Deploy automatically on every push
 
+### Environment Variables for Production
+Make sure to add all environment variables in your deployment platform:
+- Firebase configuration
+- Razorpay keys (both test and live)
+- Gemini API key
+- EmailJS credentials
+- NextAuth secret
+
 ### Other Platforms
-The app can be deployed on any platform that supports Next.js:
 - Netlify
 - Railway
 - DigitalOcean App Platform
 - AWS Amplify
 
+---
+
+## 🎯 UN Sustainable Development Goals
+
+InnoVision contributes to the following UN SDGs:
+
+| SDG | Contribution |
+|-----|--------------|
+| **SDG 4: Quality Education** | Free/affordable education, curriculum access (LKG-12), skill development |
+| **SDG 8: Decent Work** | Skill development courses, reducing financial barriers |
+| **SDG 9: Innovation** | AI technology for education, digital infrastructure |
+| **SDG 10: Reduced Inequalities** | 50% education discount, multi-language support, offline mode |
+| **SDG 17: Partnerships** | LMS integration, institutional partnerships |
+
+---
+
+## 📊 Comparative Study
+
+| Feature | InnoVision | Coursera | Udemy | Khan Academy |
+|---------|------------|----------|-------|--------------|
+| AI Course Generation | ✅ Yes | ❌ No | ❌ No | ❌ No |
+| Custom Topic Courses | ✅ Unlimited | ❌ Fixed | ❌ Fixed | ❌ Fixed |
+| Real-time Generation | ✅ Instant | ❌ N/A | ❌ N/A | ❌ N/A |
+| Gamification | ✅ Full | ⚠️ Limited | ❌ No | ⚠️ Limited |
+| Offline Mode | ✅ Yes | ⚠️ Paid | ⚠️ Paid | ❌ No |
+| Multi-language | ✅ Yes | ⚠️ Limited | ⚠️ Limited | ✅ Yes |
+| Free Tier | ✅ Generous | ⚠️ Limited | ❌ No | ✅ Yes |
+| Education Discount | ✅ 50% Off | ⚠️ Varies | ❌ No | ✅ Free |
+| Price | ₹100/month | $39-59/month | $20-200/course | Free |
+
+---
+
 ## 🤝 Contributing
 
-We welcome contributions! Please follow these steps:
-
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📸 Screenshots
+---
 
-<!-- Website Photos -->
-<!-- ![Homepage](https://github.com/user-attachments/assets/0ebba6e1-5eb7-4e40-b6ff-747607d1219c)
-![Dashboard](https://github.com/user-attachments/assets/14159346-710c-4f1f-b987-3b770a490e19)
-![Course Generation](https://github.com/user-attachments/assets/3158eb8a-dbda-4570-85af-61463241f403)
-![Learning Interface](https://github.com/user-attachments/assets/4f89132f-5a85-4628-9b76-72761dec8508)
-![Progress Tracking](https://github.com/user-attachments/assets/f81ff3d9-44ce-4c34-b45c-e9bdb02ce588) -->
+## 📞 Support
 
-## 🔗 Links
+- **Website:** [https://innovision7.live](https://innovision7.live)
+- **Email:** vikas.ambalazari@gmail.com
+- **GitHub Issues:** [Report Issues](https://github.com/ItsVikasA/InnoVision/issues)
 
-- **Live Demo**: [https://InnoVision.vercel.app](https://InnoVision2.vercel.app)
-- **Repository**: [https://github.com/ItsVikasA/Innovision2](https://github.com/ItsVikasA/Innovision2)
+---
 
 ## 📄 License
 
 This project is licensed under the ISC License.
+
+---
 
 ## 🙏 Acknowledgments
 
@@ -238,7 +423,22 @@ This project is licensed under the ISC License.
 - Shadcn/UI for beautiful components
 - Next.js team for the amazing framework
 - Firebase for backend services
+- Razorpay for payment processing
+- Framer Motion for animations
+- Recharts for data visualization
 
 ---
 
-Made with ❤️ by the InnoVision Team
+<p align="center">
+  <strong>InnoVision - Empowering Minds, Transforming Futures</strong>
+</p>
+
+<p align="center">
+  Made with ❤️ in India
+</p>
+
+<p align="center">
+  <a href="https://github.com/ItsVikasA/InnoVision">
+    <img src="https://img.shields.io/github/stars/ItsVikasA/InnoVision?style=social" alt="GitHub Stars"/>
+  </a>
+</p>
