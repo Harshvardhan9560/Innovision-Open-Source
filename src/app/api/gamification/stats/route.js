@@ -86,7 +86,7 @@ export async function POST(request) {
     const xpRewards = {
       complete_chapter: 50,
       complete_course: 500,
-      perfect_quiz: 200,
+      perfect_quiz: 2,
       help_student: 75,
       view_course: 10,
       complete_lesson: 50,
