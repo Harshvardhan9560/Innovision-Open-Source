@@ -17,7 +17,7 @@ export default function SignIn() {
   }, [user, router]);
 
   return (
-    <div className="min-h-[calc(100vh-64px)] relative bg-background overflow-hidden">
+    <div className="min-h-[calc(100vh-64px)] relative bg-background overflow-hidden flex items-center justify-center">
       {/* Animated dots background */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         {[...Array(100)].map((_, i) => (

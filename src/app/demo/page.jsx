@@ -12,7 +12,7 @@ const Page = () => {
       <PageBackground />
       <GridPattern opacity={0.02} />
 
-      <div className="max-w-5xl mx-auto pt-4 w-[95vw] relative z-10">
+      <div className="max-w-5xl mx-auto pt-16 w-[95vw] relative z-10">
         <ScrollReveal>
           <div className="relative mb-6">
             <Link href={user ? "/roadmap" : "/"} className="absolute top-1/2 -translate-y-1/2 p-2 rounded-full hover:bg-muted transition-colors">

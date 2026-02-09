@@ -93,10 +93,10 @@ export default function Landing() {
 
         {/* Footer - Sheryians Style */}
         <footer className="w-screen border-t border-border bg-background">
-          <div className="container mx-auto px-4 md:px-6 py-12">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="container mx-auto px-8 md:px-6 py-12">
+            <div className="flex justify-evenly max-md:flex-col gap-8">
               {/* Brand */}
-              <div className="space-y-4">
+              <div className="space-y-4 md:w-[25%] max-md:w-full">
                 <div className="flex items-center gap-2 font-light text-lg">
                   <Image
                     src="/InnoVision_LOGO-removebg-preview.png"
