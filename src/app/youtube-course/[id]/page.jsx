@@ -75,15 +75,16 @@ export default function YouTubeCourseView() {
     }
   };
 
-  const markChapterComplete = async (chapterNumber) => {
+  const markChapterComplete = async (chapterNumber, completed = true) => {
     try {
       const response = await fetch("/api/youtube/roadmap", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ courseId, chapterNumber, completed: true })
+        body: JSON.stringify({ courseId, chapterNumber, completed })
       });
 
       const handleNextChapter = () => {
+        if (!completed) return;
         const currentIndex = course.chapters.findIndex(c => c.number === chapterNumber);
         if (currentIndex !== -1 && currentIndex < course.chapters.length - 1) {
           const nextChapter = course.chapters[currentIndex + 1];
@@ -95,33 +96,34 @@ export default function YouTubeCourseView() {
       };
 
       if (response.ok) {
-        toast.success("Chapter marked as complete!");
-
-        // Update local state instead of fetching to preserve active chapter
+        toast.success(completed ? "Chapter marked as complete!" : "Chapter marked as incomplete");
         setCourse(prev => ({
           ...prev,
-          completedChapters: [...(prev.completedChapters || []), chapterNumber].sort((a, b) => a - b)
+          completedChapters: completed
+            ? [...(prev.completedChapters || []), chapterNumber].sort((a, b) => a - b)
+            : (prev.completedChapters || []).filter(ch => ch !== chapterNumber)
         }));
 
-        handleNextChapter();
+        if (completed) handleNextChapter();
       } else {
-        // Even if server fails, update local state for better UX
+
         const result = await response.json().catch(() => ({}));
         if (response.status === 503) {
-          // Firebase not configured - update locally
           setCourse(prev => ({
             ...prev,
-            completedChapters: [...(prev.completedChapters || []), chapterNumber].sort((a, b) => a - b)
+            completedChapters: completed
+              ? [...(prev.completedChapters || []), chapterNumber].sort((a, b) => a - b)
+              : (prev.completedChapters || []).filter(ch => ch !== chapterNumber)
           }));
-          toast.success("Chapter marked as complete!");
-          handleNextChapter();
+          toast.success(completed ? "Chapter marked as complete!" : "Chapter marked as incomplete");
+          if (completed) handleNextChapter();
         } else {
-          toast.error(result.error || "Failed to mark chapter complete");
+          toast.error(result.error || "Failed to update status");
         }
       }
     } catch (error) {
-      console.error("Error marking chapter complete:", error);
-      toast.error("Failed to mark chapter complete");
+      console.error("Error updating chapter status:", error);
+      toast.error("Failed to update status");
     }
   };
 
@@ -298,13 +300,13 @@ export default function YouTubeCourseView() {
                           setQuizResults(null);
                         }}
                         className={`w-full flex items-center gap-3 p-4 text-left border-b transition-colors ${isActive
-                            ? 'bg-primary/10 border-l-4 border-l-primary'
-                            : 'hover:bg-muted/50 border-l-4 border-l-transparent'
+                          ? 'bg-primary/10 border-l-4 border-l-primary'
+                          : 'hover:bg-muted/50 border-l-4 border-l-transparent'
                           }`}
                       >
                         <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${isCompleted
-                            ? 'bg-green-500 text-white'
-                            : 'bg-muted text-muted-foreground'
+                          ? 'bg-green-500 text-white'
+                          : 'bg-muted text-muted-foreground'
                           }`}>
                           {isCompleted ? (
                             <CheckCircle2 className="h-4 w-4" />
@@ -346,8 +348,12 @@ export default function YouTubeCourseView() {
                           {activeChapter.description}
                         </CardDescription>
                       </div>
-                      {!completedChapters.includes(activeChapter.number) && (
-                        <Button onClick={() => markChapterComplete(activeChapter.number)}>
+                      {completedChapters.includes(activeChapter.number) ? (
+                        <Button variant="outline" onClick={() => markChapterComplete(activeChapter.number, false)}>
+                          <CheckCircle2 className="h-4 w-4 mr-2" /> Completed
+                        </Button>
+                      ) : (
+                        <Button onClick={() => markChapterComplete(activeChapter.number, true)}>
                           <CheckCircle className="h-4 w-4 mr-2" /> Mark Complete
                         </Button>
                       )}
