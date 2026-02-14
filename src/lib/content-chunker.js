@@ -1,24 +1,18 @@
-/**
- * AI-Powered Content Chunking Service
- * Uses Gemini AI to intelligently split extracted text into logical chapters.
- */
+
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-const MAX_INPUT_CHARS = 100000; // ~25k tokens for Gemini
-const MIN_CHAPTER_LENGTH = 200; // minimum chars per chapter
+const MAX_INPUT_CHARS = 100000; 
+const MIN_CHAPTER_LENGTH = 200; 
 
-/**
- * Use Gemini AI to analyze text and produce structured chapters
- */
 export async function chunkContentWithAI(text, fileName) {
-    // Truncate very long texts to fit within token limits
+   
     const truncatedText =
         text.length > MAX_INPUT_CHARS ? text.slice(0, MAX_INPUT_CHARS) : text;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `You are an expert educational content organizer. Analyze the following text extracted from a document titled "${fileName}" and break it into logical chapters for a structured course.
 
@@ -53,7 +47,7 @@ ${truncatedText}
         const result = await model.generateContent(prompt);
         const response = result.response.text();
 
-        // Clean up the response - remove markdown code fences if present
+       
         let cleanedResponse = response.trim();
         if (cleanedResponse.startsWith("```")) {
             cleanedResponse = cleanedResponse
@@ -97,14 +91,12 @@ ${truncatedText}
     }
 }
 
-/**
- * Fallback: simple word-count-based chunking when AI fails
- */
+
 function fallbackChunking(text, fileName) {
     const words = text.split(/\s+/);
     const totalWords = words.length;
 
-    // Aim for ~1500 words per chapter
+
     const targetChapterSize = 1500;
     const numChapters = Math.max(2, Math.min(15, Math.ceil(totalWords / targetChapterSize)));
     const wordsPerChapter = Math.ceil(totalWords / numChapters);
@@ -130,11 +122,9 @@ function fallbackChunking(text, fileName) {
     return chapters;
 }
 
-/**
- * Generate a course title from file name using AI
- */
+
 export async function generateCourseTitle(fileName, textPreview) {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const cleanName = fileName.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " ");
     const preview = textPreview.slice(0, 1000);
@@ -155,11 +145,8 @@ Return ONLY the title text, nothing else.`;
     }
 }
 
-/**
- * Generate a course description from text preview using AI
- */
 export async function generateCourseDescription(textPreview) {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const preview = textPreview.slice(0, 2000);
 
@@ -176,3 +163,5 @@ Return ONLY the description text, nothing else.`;
         return "AI-generated course from uploaded document content.";
     }
 }
+
+

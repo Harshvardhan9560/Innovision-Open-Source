@@ -3,29 +3,28 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-    BookOpen,
-    Clock,
-    FileText,
-    Loader2,
-    ArrowLeft,
-    BookMarked,
-    ChevronRight,
-    BarChart3,
-    Sparkles,
-} from "lucide-react";
-import {
     PageBackground,
     GridPattern,
     ScrollReveal,
 } from "@/components/ui/PageWrapper";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+} from "@/components/ui/card";
+import {
+    Loader2,
+    BookOpen,
+    ArrowLeft,
+    Sparkles,
+    BarChart3,
+    Clock,
+    FileText,
+    BookMarked,
+    ChevronRight
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function IngestedCoursePage() {
     const params = useParams();
