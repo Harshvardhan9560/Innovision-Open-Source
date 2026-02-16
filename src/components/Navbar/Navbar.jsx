@@ -136,7 +136,7 @@ const Navbar = () => {
           className="flex items-center gap-1.5 sm:gap-2 hover:opacity-80 transition-opacity shrink-0"
         >
           <Image src="/InnoVision_LOGO-removebg-preview.png" alt="logo" width={28} height={28} className="sm:w-8 sm:h-8" />
-          <span className="text-sm sm:text-base font-light text-foreground">InnoVision</span>
+          <span className="text-sm sm:text-base font-light text-foreground hidden min-[400px]:block">InnoVision</span>
         </Link>
 
         {/* Desktop Navigation - Centered */}
@@ -150,7 +150,7 @@ const Navbar = () => {
         />
 
         {/* Right Section */}
-        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+        <div className="flex items-center gap-0.5 sm:gap-2 shrink-0">
           {user && (
             <>
               {/* Premium Badge */}

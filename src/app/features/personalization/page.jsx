@@ -127,7 +127,7 @@ export default function PersonalizationPage() {
 
         {!premiumStatus.isPremium ? (
           <ScrollReveal delay={100}>
-            <div className="text-center p-12 border-2 border-dashed rounded-xl bg-card/50 backdrop-blur-sm">
+            <div className="text-center p-6 sm:p-12 border-2 border-dashed rounded-xl bg-card/50 backdrop-blur-sm">
               <Brain className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
               <h2 className="text-2xl font-bold mb-4">Premium Feature</h2>
               <p className="text-muted-foreground mb-6">

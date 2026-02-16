@@ -36,9 +36,8 @@ const MobileMenu = ({
                     key={item.href}
                     href={item.href}
                     onClick={() => setIsOpen(false)}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors font-light ${
-                      isActiveLink(item.href) ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                    }`}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors font-light ${isActiveLink(item.href) ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                      }`}
                   >
                     <item.icon className="h-5 w-5" />
                     {item.label}
@@ -51,9 +50,8 @@ const MobileMenu = ({
                     key={item.href}
                     href={item.href}
                     onClick={() => setIsOpen(false)}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors font-light ${
-                      isActiveLink(item.href) ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                    }`}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors font-light ${isActiveLink(item.href) ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                      }`}
                   >
                     <item.icon className="h-5 w-5" />
                     {item.label}
@@ -66,9 +64,8 @@ const MobileMenu = ({
                     key={item.href}
                     href={item.href}
                     onClick={() => setIsOpen(false)}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors font-light ${
-                      isActiveLink(item.href) ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                    }`}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors font-light ${isActiveLink(item.href) ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                      }`}
                   >
                     <item.icon className="h-5 w-5" />
                     {item.label}

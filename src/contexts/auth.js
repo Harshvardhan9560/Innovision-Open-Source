@@ -10,6 +10,8 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
@@ -121,6 +123,8 @@ export function AuthProvider({ children }) {
       console.error("Error saving user information:", error);
     }
   };
+
+
 
   return (
     <AuthContext.Provider value={{ user, loading, googleSignIn, githubSignIn, logout }}>
