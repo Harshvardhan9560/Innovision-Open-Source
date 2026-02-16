@@ -124,10 +124,14 @@ export function AuthProvider({ children }) {
     }
   };
 
-
+  const getToken = async () => {
+    const u = auth.currentUser;
+    if (!u) return null;
+    return await u.getIdToken();
+  };
 
   return (
-    <AuthContext.Provider value={{ user, loading, googleSignIn, githubSignIn, logout }}>
+    <AuthContext.Provider value={{ user, loading, googleSignIn, githubSignIn, logout, getToken }}>
       {children}
     </AuthContext.Provider>
   );

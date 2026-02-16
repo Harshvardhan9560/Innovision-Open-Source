@@ -35,7 +35,7 @@ export async function GET(request) {
     return NextResponse.json({
       count,
       courses,
-      limit: 1, 
+      limit: 1,
       remaining: Math.max(0, 1 - count)
     });
   } catch (error) {

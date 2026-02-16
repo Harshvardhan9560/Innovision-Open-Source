@@ -25,9 +25,33 @@ const faqs = [
     answer: "Yes, you'll need to create a free account to generate and access courses. This allows us to save your progress, provide personalized recommendations, and ensure you can return to your learning materials anytime."
   },
   {
-    question: "How does InnoVision ensure the quality of course content?",
-    answer: "Our AI is trained on high-quality educational materials and continuously improved based on user feedback. We also implement regular quality checks and updates to ensure accuracy and effectiveness of the generated content."
-  }
+  question: "How does InnoVision ensure the quality of course content?",
+  answer: "Our AI is trained on high-quality educational materials and continuously improved based on user feedback. We also implement regular quality checks and updates to ensure accuracy and effectiveness of the generated content."
+},
+{
+  question: "Is InnoVision free to use?",
+  answer: "Yes, InnoVision provides free access to core learning features. Some advanced tools or premium features may be introduced in the future."
+},
+{
+  question: "Can I customize my learning roadmap?",
+  answer: "Yes, users can choose different learning paths such as fast-track, balanced, or in-depth modes depending on their preferred learning style."
+},
+{
+  question: "Does InnoVision provide certifications?",
+  answer: "Currently, InnoVision focuses on structured learning and skill development. Certification features may be introduced in future updates."
+},
+{
+  question: "What learning levels are supported?",
+  answer: "InnoVision supports beginner, intermediate, and advanced learners with structured content progression and practical learning guidance."
+},
+{
+  question: "Is my personal data secure?",
+  answer: "Yes, user data is securely handled using authentication systems and protected database storage. We prioritize privacy and data security."
+},
+{
+  question: "Can I access my courses across devices?",
+  answer: "Yes, once you log in, your courses and progress are saved to your account and can be accessed from any device."
+}
 ];
 
 const FAQItem = ({ question, answer, isOpen, onClick }) => (

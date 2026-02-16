@@ -13,7 +13,7 @@ export async function GET(request, { params }) {
     try {
       const { getAdminDb } = await import("@/lib/firebase-admin");
       const adminDb = getAdminDb();
-      
+
       if (adminDb && session?.user?.email) {
         const ytCourseDoc = await adminDb
           .collection("users")
@@ -52,7 +52,7 @@ export async function GET(request, { params }) {
     try {
       const { getCourse } = await import("@/lib/course-store");
       const courseData = getCourse(courseId);
-      
+
       if (courseData) {
         return NextResponse.json({
           id: courseId,
@@ -70,7 +70,7 @@ export async function GET(request, { params }) {
       timestamp: new Date().toISOString()
     });
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       error: "Course not found",
       courseId,
       message: "The course may have been generated but is no longer available. Please regenerate the course.",
@@ -90,7 +90,7 @@ export async function PUT(request, { params }) {
       const { getServerSession } = await import("@/lib/auth-server");
       const adminDb = getAdminDb();
       const session = await getServerSession();
-      
+
       if (adminDb && session?.user?.email) {
         const ytCourseRef = adminDb
           .collection("users")
@@ -135,7 +135,7 @@ export async function DELETE(request, { params }) {
       const { getServerSession } = await import("@/lib/auth-server");
       const adminDb = getAdminDb();
       const session = await getServerSession();
-      
+
       if (adminDb && session?.user?.email) {
         const ytCourseRef = adminDb
           .collection("users")

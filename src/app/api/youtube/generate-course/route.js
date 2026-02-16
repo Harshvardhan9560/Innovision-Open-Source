@@ -180,18 +180,18 @@ IMPORTANT RULES:
     };
     let savedToDb = false;
     let finalCourseId = courseId;
-    
+
     try {
       const { getAdminDb } = await import("@/lib/firebase-admin");
       const adminDb = getAdminDb();
-      
+
       if (adminDb && session?.user?.email) {
         const docRef = await adminDb
           .collection("users")
           .doc(session.user.email)
           .collection("youtube-courses")
           .add(enhancedCourseData);
-        
+
         finalCourseId = docRef.id;
         enhancedCourseData.id = finalCourseId;
         savedToDb = true;
@@ -208,9 +208,9 @@ IMPORTANT RULES:
       console.warn("Could not store in temp store:", storeError.message);
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
-      id: finalCourseId, 
+      id: finalCourseId,
       ...enhancedCourseData,
       savedToDb
     });

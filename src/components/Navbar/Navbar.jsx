@@ -54,6 +54,23 @@ const Navbar = () => {
     document.documentElement.className = savedTheme;
   }, []);
 
+  useEffect(() => {
+    if (!mobileMenuOpen) {
+      return undefined;
+    }
+
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = originalBodyOverflow;
+      document.documentElement.style.overflow = originalHtmlOverflow;
+    };
+  }, [mobileMenuOpen]);
+
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
@@ -128,8 +145,9 @@ const Navbar = () => {
   ];
 
   return (
-    <header className="h-16 w-full border-b fixed top-0 left-0 bg-background/80 backdrop-blur-xl z-50 border-border">
-      <div className="h-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 flex items-center justify-between">
+    <>
+      <header className="h-16 w-full border-b fixed top-0 left-0 bg-background/80 backdrop-blur-xl z-50 border-border">
+        <div className="h-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 flex items-center justify-between">
         {/* Logo - Left */}
         <Link
           href={user ? `/roadmap` : "/"}
@@ -258,7 +276,8 @@ const Navbar = () => {
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
         </div>
-      </div>
+        </div>
+      </header>
 
       {/* Mobile Menu */}
       <MobileMenu
@@ -271,7 +290,7 @@ const Navbar = () => {
         landingNavItems={landingNavItems}
         isActiveLink={isActiveLink}
       />
-    </header>
+    </>
   );
 };
 

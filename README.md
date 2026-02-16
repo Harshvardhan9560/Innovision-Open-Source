@@ -1,4 +1,8 @@
 <p align="center">
+  <img src="https://github.com/ItsVikasA/Innovision-Open-Source/blob/main/OSCG26%20Label.jpg.jpeg" alt="OSCG26" width=""/>
+</p>
+
+<p align="center">
   <img src="./public/InnoVision_LOGO-removebg-preview.png" alt="InnoVision Logo" width="200"/>
 </p>
 

@@ -192,8 +192,8 @@ export async function GET(request) {
 
     const adminDb = getAdminDb();
     if (!adminDb) {
-      return NextResponse.json({ 
-        success: true, 
+      return NextResponse.json({
+        success: true,
         progress: {}
       });
     }
@@ -236,7 +236,7 @@ async function awardExerciseXP(userEmail, xpAmount, chapterNumber, exerciseId) {
       console.warn("Firebase not configured, skipping XP award");
       return;
     }
-    
+
     const statsRef = adminDb.collection("gamification").doc(userEmail);
     await adminDb.runTransaction(async (transaction) => {
       const statsDoc = await transaction.get(statsRef);

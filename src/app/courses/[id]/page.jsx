@@ -39,7 +39,7 @@ export default function CourseDetailPage() {
   };
 
   const handleEnroll = async () => {
-    if (!session) {
+    if (!user) {
       toast.error("Please login to enroll");
       router.push("/login");
       return;

@@ -122,7 +122,7 @@ export async function PUT(request) {
     const adminDb = getAdminDb();
 
     if (!adminDb) {
-      return NextResponse.json({ 
+      return NextResponse.json({
         error: "Database not configured",
         _warning: "Quiz functionality requires Firebase configuration"
       }, { status: 503 });
@@ -207,7 +207,7 @@ async function awardQuizXP(userEmail, xpAmount, chapterNumber) {
       console.warn("Firebase not configured, skipping XP award");
       return;
     }
-    
+
     const statsRef = adminDb.collection("gamification").doc(userEmail);
     await adminDb.runTransaction(async (transaction) => {
       const statsDoc = await transaction.get(statsRef);
