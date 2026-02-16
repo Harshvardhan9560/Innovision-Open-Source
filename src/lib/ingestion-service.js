@@ -1,7 +1,4 @@
-/**
- * Content Ingestion Orchestration Service
- * Coordinates the full pipeline: file validation → extraction → AI chunking → Firestore storage
- */
+
 
 import { getAdminDb, FieldValue } from "@/lib/firebase-admin";
 import { extractText, detectFileType } from "@/lib/text-extractor";
@@ -14,9 +11,7 @@ import {
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ["pdf", "txt", "epub"];
 
-/**
- * Validate the uploaded file
- */
+
 function validateFile(fileName, fileSize) {
     const fileType = detectFileType(fileName);
 
@@ -80,10 +75,11 @@ export async function ingestContent(fileBuffer, fileName, fileSize, userId) {
         generateCourseDescription(text),
     ]);
 
-    // Step 4: AI-powered chunking into chapters
+
     const chapters = await chunkContentWithAI(text, fileName);
 
-    // Step 5: Calculate statistics
+
+
     const totalWords = chapters.reduce((sum, ch) => sum + ch.wordCount, 0);
     const estimatedReadingTime = Math.ceil(totalWords / 200); // 200 wpm average
 
@@ -133,6 +129,8 @@ export async function ingestContent(fileBuffer, fileName, fileSize, userId) {
         });
     });
 
+
+
     await batch.commit();
 
     return {
@@ -149,5 +147,6 @@ export async function ingestContent(fileBuffer, fileName, fileSize, userId) {
             summary: ch.summary,
             wordCount: ch.wordCount,
         })),
+
     };
 }

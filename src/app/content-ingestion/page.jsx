@@ -43,7 +43,7 @@ export default function ContentIngestion() {
   const [pastCourses, setPastCourses] = useState([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, getToken } = useAuth();
 
   useEffect(() => {
     const fetchPremiumStatus = async () => {
@@ -70,9 +70,9 @@ export default function ContentIngestion() {
       return;
     }
     try {
-      const token = await user.getIdToken();
+      const token = await getToken?.();
       const res = await fetch("/api/ingested-courses", {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (res.ok) {
         const data = await res.json();
@@ -116,8 +116,8 @@ export default function ContentIngestion() {
       const headers = {};
       try {
         if (user) {
-          const token = await user.getIdToken();
-          headers["Authorization"] = `Bearer ${token}`;
+          const token = await getToken?.();
+          if (token) headers["Authorization"] = `Bearer ${token}`;
         }
       } catch (e) {
         console.log("Could not get auth token, proceeding without auth");

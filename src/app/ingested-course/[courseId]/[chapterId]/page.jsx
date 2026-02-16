@@ -11,19 +11,42 @@ import {
     Clock,
     ChevronUp,
     List,
+    Sparkles,
+    Lightbulb,
+    HelpCircle,
+    CheckCircle2,
+    XCircle,
+    RotateCcw
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { cn } from "@/lib/utils";
 
 export default function IngestedChapterPage() {
     const params = useParams();
     const router = useRouter();
     const { user } = useAuth();
+
+    // Data States
     const [chapter, setChapter] = useState(null);
     const [courseTitle, setCourseTitle] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [readProgress, setReadProgress] = useState(0);
     const contentRef = useRef(null);
+
+    // AI Feature States
+    const [aiSummary, setAiSummary] = useState(null);
+    const [loadingSummary, setLoadingSummary] = useState(false);
+
+    const [aiTips, setAiTips] = useState(null);
+    const [loadingTips, setLoadingTips] = useState(false);
+
+    const [quiz, setQuiz] = useState(null);
+    const [loadingQuiz, setLoadingQuiz] = useState(false);
+    const [quizAnswers, setQuizAnswers] = useState({}); // { [questionIndex]: selectedOptionIndex }
+    const [quizSubmitted, setQuizSubmitted] = useState(false);
+
+    const [aiError, setAiError] = useState(null);
 
     useEffect(() => {
         fetchChapter();
@@ -32,7 +55,6 @@ export default function IngestedChapterPage() {
     useEffect(() => {
         const handleScroll = () => {
             if (!contentRef.current) return;
-            const el = contentRef.current;
             const scrollTop = window.scrollY;
             const docHeight = document.documentElement.scrollHeight - window.innerHeight;
             if (docHeight > 0) {
@@ -53,6 +75,13 @@ export default function IngestedChapterPage() {
                 const data = await res.json();
                 setChapter(data.chapter);
                 setCourseTitle(data.courseTitle || "");
+                // Reset AI Text states on chapter change
+                setAiSummary(null);
+                setAiTips(null);
+                setQuiz(null);
+                setQuizAnswers({});
+                setQuizSubmitted(false);
+                setAiError(null);
             } else {
                 setError("Chapter not found");
             }
@@ -60,6 +89,78 @@ export default function IngestedChapterPage() {
             setError("Failed to load chapter");
         }
         setLoading(false);
+    };
+
+    const generateAIContent = async (type) => {
+        const contentText = typeof chapter?.content === "string" ? chapter.content : String(chapter?.content ?? "");
+        if (!contentText.trim()) return;
+
+        let setLoadingFn;
+        let setContentFn;
+
+        switch (type) {
+            case "summary":
+                setLoadingFn = setLoadingSummary;
+                setContentFn = setAiSummary;
+                break;
+            case "tips":
+                setLoadingFn = setLoadingTips;
+                setContentFn = setAiTips;
+                break;
+            case "quiz":
+                setLoadingFn = setLoadingQuiz;
+                setContentFn = setQuiz;
+                break;
+            default:
+                return;
+        }
+
+        setAiError(null);
+        setLoadingFn(true);
+        try {
+            const res = await fetch("/api/ai/generate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ type, content: contentText }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                const message = data?.error || data?.details || `Generation failed (${res.status})`;
+                setAiError(message);
+                return;
+            }
+            if (data.error) {
+                setAiError(data.error);
+                return;
+            }
+            if (data.result != null) {
+                setContentFn(data.result);
+            }
+        } catch (error) {
+            console.error(`Failed to generate ${type}:`, error);
+            setAiError(error?.message || "Network error. Please try again.");
+        } finally {
+            setLoadingFn(false);
+        }
+    };
+
+    const handleQuizOptionSelect = (qIndex, optionIndex) => {
+        if (quizSubmitted) return;
+        setQuizAnswers(prev => ({
+            ...prev,
+            [qIndex]: optionIndex
+        }));
+    };
+
+    const submitQuiz = () => {
+        setQuizSubmitted(true);
+    };
+
+    const resetQuiz = () => {
+        setQuizAnswers({});
+        setQuizSubmitted(false);
     };
 
     const scrollToTop = () => {
@@ -149,11 +250,44 @@ export default function IngestedChapterPage() {
                     <h1 className="text-3xl lg:text-4xl font-bold leading-tight">
                         {chapter.title}
                     </h1>
+
+                    {/* Native Summary */}
                     {chapter.summary && (
                         <p className="mt-3 text-lg text-muted-foreground leading-relaxed">
                             {chapter.summary}
                         </p>
                     )}
+
+                    {/* AI Generated Summary Section */}
+                    <div className="mt-6">
+                        {!aiSummary ? (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => generateAIContent('summary')}
+                                disabled={loadingSummary}
+                                className="group border-purple-500/30 text-purple-600 hover:text-purple-700 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-900/10"
+                            >
+                                {loadingSummary ? (
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                ) : (
+                                    <Sparkles className="h-4 w-4 mr-2 group-hover:fill-purple-500/20" />
+                                )}
+                                Generate Deep Summary
+                            </Button>
+                        ) : (
+                            <div className="bg-purple-500/5 border border-purple-500/20 rounded-xl p-6 mt-4 animate-in fade-in slide-in-from-top-2">
+                                <h3 className="flex items-center gap-2 text-md font-semibold text-purple-600 dark:text-purple-400 mb-2">
+                                    <Sparkles className="h-4 w-4" />
+                                    AI Summary
+                                </h3>
+                                <p className="text-sm leading-relaxed text-muted-foreground">
+                                    {aiSummary}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+
                     <div className="mt-4 flex items-center gap-3 text-sm text-muted-foreground">
                         <span>{chapter.wordCount?.toLocaleString()} words</span>
                         <span>•</span>
@@ -176,6 +310,156 @@ export default function IngestedChapterPage() {
                         );
                     })}
                 </article>
+
+                <hr className="my-12 border-border/50" />
+
+                {/* AI Features Section */}
+                <div className="space-y-12">
+                    {aiError && (
+                        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                            {aiError}
+                        </div>
+                    )}
+
+                    {/* 1. Key Tips */}
+                    <section>
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-2xl font-bold flex items-center gap-2">
+                                <Lightbulb className="h-6 w-6 text-yellow-500" />
+                                Key Takeaways
+                            </h2>
+                            {!aiTips && (
+                                <Button
+                                    onClick={() => generateAIContent('tips')}
+                                    disabled={loadingTips}
+                                    variant="outline"
+                                >
+                                    {loadingTips ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
+                                    Load Tips
+                                </Button>
+                            )}
+                        </div>
+
+                        {aiTips && (
+                            <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-xl p-6">
+                                <ul className="space-y-3">
+                                    {aiTips.split('\n').filter(t => t.trim()).map((tip, i) => (
+                                        <li key={i} className="flex gap-3 text-foreground/80">
+                                            <span className="shrink-0 w-6 h-6 rounded-full bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 flex items-center justify-center text-xs font-bold">
+                                                {i + 1}
+                                            </span>
+                                            <span className="text-sm leading-6">{tip.replace(/^[-•*]\s*/, '')}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </section>
+
+                    {/* 2. Interactive Quiz */}
+                    <section>
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-2xl font-bold flex items-center gap-2">
+                                <HelpCircle className="h-6 w-6 text-blue-500" />
+                                Knowledge Check
+                            </h2>
+                            {!quiz && (
+                                <Button
+                                    onClick={() => generateAIContent('quiz')}
+                                    disabled={loadingQuiz}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                                >
+                                    {loadingQuiz ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
+                                    Generate Quiz
+                                </Button>
+                            )}
+                        </div>
+
+                        {quiz && Array.isArray(quiz) && (
+                            <div className="space-y-6">
+                                {quiz.map((q, qIndex) => (
+                                    <div key={qIndex} className="bg-card border border-border rounded-xl overflow-hidden">
+                                        <div className="p-4 bg-muted/30 border-b border-border/50">
+                                            <h3 className="font-medium text-lg leading-snug">
+                                                {qIndex + 1}. {q.question}
+                                            </h3>
+                                        </div>
+                                        <div className="p-4 space-y-2">
+                                            {q.options.map((option, optIndex) => {
+                                                const isSelected = quizAnswers[qIndex] === optIndex;
+                                                const isCorrect = q.correctAnswer === optIndex;
+
+                                                let className = "w-full justify-start h-auto py-3 px-4 text-left font-normal";
+
+                                                if (quizSubmitted) {
+                                                    if (isCorrect) {
+                                                        className += " bg-green-500/10 border-green-500/50 text-green-700 dark:text-green-300 hover:bg-green-500/20";
+                                                    } else if (isSelected && !isCorrect) {
+                                                        className += " bg-red-500/10 border-red-500/50 text-red-700 dark:text-red-300 hover:bg-red-500/20";
+                                                    } else {
+                                                        className += " opacity-50";
+                                                    }
+                                                } else {
+                                                    if (isSelected) {
+                                                        className += " border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300";
+                                                    }
+                                                }
+
+                                                return (
+                                                    <Button
+                                                        key={optIndex}
+                                                        variant="outline"
+                                                        className={className}
+                                                        onClick={() => handleQuizOptionSelect(qIndex, optIndex)}
+                                                        disabled={quizSubmitted}
+                                                    >
+                                                        <div className="flex items-center w-full">
+                                                            <div className={cn(
+                                                                "w-6 h-6 rounded-full border flex items-center justify-center mr-3 text-xs",
+                                                                isSelected || (quizSubmitted && isCorrect) ? "border-current" : "border-muted-foreground/30"
+                                                            )}>
+                                                                {String.fromCharCode(65 + optIndex)}
+                                                            </div>
+                                                            <span className="flex-1">{option}</span>
+                                                            {quizSubmitted && isCorrect && <CheckCircle2 className="h-5 w-5 text-green-600 ml-2" />}
+                                                            {quizSubmitted && isSelected && !isCorrect && <XCircle className="h-5 w-5 text-red-600 ml-2" />}
+                                                        </div>
+                                                    </Button>
+                                                );
+                                            })}
+                                        </div>
+                                        {quizSubmitted && q.explanation && (
+                                            <div className="px-4 pb-4 pt-0">
+                                                <div className="bg-muted/50 rounded-lg p-3 text-sm text-muted-foreground">
+                                                    <span className="font-semibold mr-1">Explanation:</span>
+                                                    {q.explanation}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+
+                                <div className="flex justify-end gap-3 pt-4">
+                                    {quizSubmitted ? (
+                                        <Button onClick={resetQuiz} variant="outline" className="gap-2">
+                                            <RotateCcw className="h-4 w-4" /> Try Again
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            onClick={submitQuiz}
+                                            disabled={Object.keys(quizAnswers).length !== quiz.length}
+                                            className="bg-green-600 hover:bg-green-700 text-white gap-2"
+                                        >
+                                            <CheckCircle2 className="h-4 w-4" />
+                                            Submit Answers
+                                        </Button>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </section>
+
+                </div>
 
                 {/* Chapter Navigation */}
                 <div className="mt-12 pt-6 border-t border-border/50">
