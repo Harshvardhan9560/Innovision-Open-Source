@@ -8,6 +8,7 @@ import { useContext } from "react";
 import xpContext from "@/contexts/xp";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import ChatBot from "@/components/chat/ChatBot";
 
 export default function StudioCoursePage() {
   const params = useParams();
@@ -134,6 +135,7 @@ export default function StudioCoursePage() {
           </div>
         </div>
       </div>
+      <ChatBot courseId={params.courseId} courseTitle={courseData?.title} />
     </div>
   );
 }

@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { 
-  PlaySquare, Loader2, BookOpen, CheckCircle, Crown, Sparkles, 
-  FileText, Brain, Target, Map, ChevronRight, AlertCircle, 
+import {
+  PlaySquare, Loader2, BookOpen, CheckCircle, Crown, Sparkles,
+  FileText, Brain, Target, Map, ChevronRight, AlertCircle,
   Youtube, Clock, User, ArrowRight, RefreshCw
 } from "lucide-react";
 import { toast } from "sonner";
@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth";
 import { PageBackground, GridPattern, PageHeader, ScrollReveal, HoverCard } from "@/components/ui/PageWrapper";
 import { saveCourseOffline } from "@/lib/offline";
+import ChatBot from "@/components/chat/ChatBot";
 
 export default function YouTubeCourse() {
   const [youtubeUrl, setYoutubeUrl] = useState("");
@@ -48,7 +49,7 @@ export default function YouTubeCourse() {
           const res = await fetch("/api/premium/status");
           const data = await res.json();
           setPremiumStatus(data);
-          
+
           const ytRes = await fetch("/api/youtube/status");
           if (ytRes.ok) {
             const ytData = await ytRes.json();
@@ -95,13 +96,13 @@ export default function YouTubeCourse() {
       // Step 1: Validate and get video info
       setProgressStep(1);
       setProgress("Validating YouTube URL...");
-      
+
       const infoResponse = await fetch("/api/youtube/info", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: youtubeUrl })
       });
-      
+
       if (!infoResponse.ok) {
         const errorText = await infoResponse.text();
         let errorMessage = "Failed to fetch video information";
@@ -113,7 +114,7 @@ export default function YouTubeCourse() {
         }
         throw new Error(errorMessage);
       }
-      
+
       const videoInfoData = await infoResponse.json();
       setVideoInfo(videoInfoData);
       setProgressStep(2);
@@ -122,13 +123,13 @@ export default function YouTubeCourse() {
       // Step 2: Extract transcript
       setProgressStep(3);
       setProgress("Extracting video transcript...");
-      
+
       const transcriptResponse = await fetch("/api/youtube/transcript", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ videoId: videoInfoData.videoId })
       });
-      
+
       const transcriptText = await transcriptResponse.text();
       let transcriptResult;
       try {
@@ -137,11 +138,11 @@ export default function YouTubeCourse() {
         console.error("Non-JSON transcript response:", transcriptText.substring(0, 200));
         throw new Error("Transcript service returned an invalid response. Please try again.");
       }
-      
+
       if (transcriptResult.error && !transcriptResult.transcript) {
         throw new Error(transcriptResult.error || "Failed to extract transcript");
       }
-      
+
       setTranscriptData(transcriptResult);
       setProgressStep(4);
       setProgress(`Transcript extracted (${transcriptResult.transcript?.split(' ').length || 0} words)`);
@@ -149,18 +150,18 @@ export default function YouTubeCourse() {
       // Step 3: Analyze and create chapter summary
       setProgressStep(5);
       setProgress("Analyzing content and creating chapters...");
-      
+
       const summarizeResponse = await fetch("/api/youtube/summarize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           title: videoInfoData.title,
           transcript: transcriptResult.transcript,
           timestampedTranscript: transcriptResult.timestampedTranscript,
           duration: transcriptResult.duration
         })
       });
-      
+
       const summarizeText = await summarizeResponse.text();
       let summaryResult;
       try {
@@ -176,11 +177,11 @@ export default function YouTubeCourse() {
       // Step 4: Generate full course with quizzes and exercises
       setProgressStep(7);
       setProgress("Generating comprehensive course content...");
-      
+
       const courseResponse = await fetch("/api/youtube/generate-course", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           title: videoInfoData.title,
           summary: summaryResult,
           transcript: transcriptResult.transcript,
@@ -189,7 +190,7 @@ export default function YouTubeCourse() {
           thumbnail: videoInfoData.thumbnail
         })
       });
-      
+
       const courseText = await courseResponse.text();
       let courseResult;
       try {
@@ -198,7 +199,7 @@ export default function YouTubeCourse() {
         console.error("Non-JSON course response:", courseText.substring(0, 500));
         throw new Error("Course generation service returned an invalid response. Please check server logs.");
       }
-      
+
       if (!courseResponse.ok) {
         if (courseResult.needsUpgrade) {
           toast.error(courseResult.error);
@@ -213,12 +214,12 @@ export default function YouTubeCourse() {
 
       // Step 5: Generate learning roadmap
       setProgress("Building your learning roadmap...");
-      
+
       try {
         await fetch("/api/youtube/roadmap", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
+          body: JSON.stringify({
             courseId: courseResult.id,
             courseTitle: courseResult.title,
             courseDescription: courseResult.description,
@@ -233,7 +234,7 @@ export default function YouTubeCourse() {
       }
 
       toast.success("Course generated successfully!");
-      
+
       // Save course to offline storage for persistence
       try {
         await saveCourseOffline(courseResult);
@@ -241,7 +242,7 @@ export default function YouTubeCourse() {
       } catch (offlineError) {
         console.warn("Failed to save to offline storage:", offlineError);
       }
-      
+
       // Navigate to the course view
       setTimeout(() => {
         router.push(`/youtube-course/${courseResult.id}`);
@@ -271,10 +272,10 @@ export default function YouTubeCourse() {
     <div className="min-h-screen bg-background p-6 relative">
       <PageBackground />
       <GridPattern opacity={0.02} />
-      
+
       <div className="max-w-5xl mx-auto relative z-10">
-        <PageHeader 
-          title="YouTube to Course Generator" 
+        <PageHeader
+          title="YouTube to Course Generator"
           description="Transform any YouTube video into a comprehensive, interactive learning course"
           icon={PlaySquare}
           iconColor="text-red-500"
@@ -352,8 +353,8 @@ export default function YouTubeCourse() {
                 {/* Video Preview */}
                 {videoInfo && (
                   <div className="flex gap-4 p-4 bg-muted/30 rounded-xl border border-border/50">
-                    <img 
-                      src={videoInfo.thumbnail} 
+                    <img
+                      src={videoInfo.thumbnail}
                       alt="Video thumbnail"
                       className="w-40 h-24 object-cover rounded-lg"
                       onError={(e) => e.target.src = videoInfo.thumbnailFallback}
@@ -393,17 +394,16 @@ export default function YouTubeCourse() {
                     const Icon = step.icon;
                     const isCompleted = index < progressStep;
                     const isCurrent = index === progressStep;
-                    
+
                     return (
-                      <div 
+                      <div
                         key={index}
-                        className={`flex items-center gap-2 p-3 rounded-lg transition-all ${
-                          isCompleted 
-                            ? 'bg-green-500/10 text-green-600' 
-                            : isCurrent 
-                              ? 'bg-primary/10 text-primary' 
-                              : 'bg-muted/30 text-muted-foreground'
-                        }`}
+                        className={`flex items-center gap-2 p-3 rounded-lg transition-all ${isCompleted
+                          ? 'bg-green-500/10 text-green-600'
+                          : isCurrent
+                            ? 'bg-primary/10 text-primary'
+                            : 'bg-muted/30 text-muted-foreground'
+                          }`}
                       >
                         {isCompleted ? (
                           <CheckCircle className="h-4 w-4" />
@@ -432,9 +432,9 @@ export default function YouTubeCourse() {
                   <div>
                     <h3 className="font-semibold text-destructive mb-1">Error Generating Course</h3>
                     <p className="text-sm text-muted-foreground">{error}</p>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="mt-3"
                       onClick={resetForm}
                     >
@@ -469,7 +469,7 @@ export default function YouTubeCourse() {
                     <h3 className="text-xl font-bold">{courseData.title}</h3>
                     <p className="text-muted-foreground mt-1">{courseData.description}</p>
                   </div>
-                  
+
                   <div className="flex flex-wrap gap-2">
                     <Badge variant="outline">
                       <BookOpen className="h-3 w-3 mr-1" /> {courseData.chapters?.length || 0} Chapters
@@ -494,7 +494,7 @@ export default function YouTubeCourse() {
                       <h4 className="font-semibold mb-2">Course Chapters:</h4>
                       <div className="space-y-2">
                         {courseData.chapters.slice(0, 5).map((chapter, index) => (
-                          <div 
+                          <div
                             key={index}
                             className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg"
                           >
@@ -531,35 +531,35 @@ export default function YouTubeCourse() {
             <CardContent>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[
-                  { 
-                    icon: FileText, 
-                    title: "Transcript Extraction", 
-                    description: "Automatically extracts and processes the video's transcript with timestamps" 
+                  {
+                    icon: FileText,
+                    title: "Transcript Extraction",
+                    description: "Automatically extracts and processes the video's transcript with timestamps"
                   },
-                  { 
-                    icon: BookOpen, 
-                    title: "Chapter-wise Summary", 
-                    description: "Creates organized chapters with clear summaries and key concepts" 
+                  {
+                    icon: BookOpen,
+                    title: "Chapter-wise Summary",
+                    description: "Creates organized chapters with clear summaries and key concepts"
                   },
-                  { 
-                    icon: Sparkles, 
-                    title: "In-depth Content", 
-                    description: "Generates comprehensive educational content for each chapter" 
+                  {
+                    icon: Sparkles,
+                    title: "In-depth Content",
+                    description: "Generates comprehensive educational content for each chapter"
                   },
-                  { 
-                    icon: Target, 
-                    title: "Quizzes & Exercises", 
-                    description: "Adds interactive quizzes and practical exercises for each chapter" 
+                  {
+                    icon: Target,
+                    title: "Quizzes & Exercises",
+                    description: "Adds interactive quizzes and practical exercises for each chapter"
                   },
-                  { 
-                    icon: Map, 
-                    title: "Learning Roadmap", 
-                    description: "Creates a complete learning path with milestones and goals" 
+                  {
+                    icon: Map,
+                    title: "Learning Roadmap",
+                    description: "Creates a complete learning path with milestones and goals"
                   },
-                  { 
-                    icon: Brain, 
-                    title: "AI-Powered", 
-                    description: "Uses advanced AI to understand and structure the content effectively" 
+                  {
+                    icon: Brain,
+                    title: "AI-Powered",
+                    description: "Uses advanced AI to understand and structure the content effectively"
                   }
                 ].map((feature, index) => {
                   const Icon = feature.icon;
@@ -580,6 +580,7 @@ export default function YouTubeCourse() {
           </Card>
         </ScrollReveal>
       </div>
+      <ChatBot />
     </div>
   );
 }

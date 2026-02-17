@@ -8,6 +8,7 @@ import { BookOpen, Search, User, Calendar, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { PageBackground, GridPattern, PageHeader, ScrollReveal, StaggerChildren, HoverCard } from "@/components/ui/PageWrapper";
+import ChatBot from "@/components/chat/ChatBot";
 
 export default function CoursesPage() {
   const { user } = useAuth();
@@ -165,6 +166,7 @@ export default function CoursesPage() {
           )}
         </div>
       </div>
+      <ChatBot />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, Clock, User, ArrowLeft, Play } from "lucide-react";
 import { toast } from "sonner";
+import ChatBot from "@/components/chat/ChatBot";
 
 export default function CourseDetailPage() {
   const params = useParams();
@@ -175,6 +176,7 @@ export default function CourseDetailPage() {
           )}
         </div>
       </div>
+      <ChatBot courseId={params.id} courseTitle={course?.title} />
     </div>
   );
 }
