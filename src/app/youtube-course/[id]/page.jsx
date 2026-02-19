@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/auth";
 import MarkDown from "@/components/MarkDown";
 import { getOfflineCourses } from "@/lib/offline";
+import ChatBot from "@/components/chat/ChatBot";
 
 export default function YouTubeCourseView() {
   const params = useParams();
@@ -698,6 +699,7 @@ export default function YouTubeCourseView() {
           </div>
         </div>
       </div>
+      <ChatBot courseId={courseId} courseTitle={course?.title} />
     </div>
   );
 }

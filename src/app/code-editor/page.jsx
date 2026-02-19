@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Code, Play, Download, Sparkles, Globe, Crown } from "lucide-react";
 import { toast } from "sonner";
 import { PageBackground, GridPattern, PageHeader, ScrollReveal, HoverCard } from "@/components/ui/PageWrapper";
+import ChatBot from "@/components/chat/ChatBot";
 
 export default function CodeEditor() {
   const [language, setLanguage] = useState("javascript");
@@ -274,6 +275,7 @@ export default function CodeEditor() {
           </Tabs>
         </ScrollReveal>
       </div>
+      <ChatBot />
     </div>
   );
 }

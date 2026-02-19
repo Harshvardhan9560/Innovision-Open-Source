@@ -1,6 +1,7 @@
 
 "use client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Plus, BookOpen, Sparkles } from "lucide-react";
 import DeleteRoadmap from "@/components/Home/DeleteRoadmap";
 import Link from "next/link";
@@ -8,6 +9,7 @@ import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { loader } from "@/components/ui/Custom/ToastLoader";
 import { PageBackground, GridPattern, PageHeader, ScrollReveal, HoverCard } from "@/components/ui/PageWrapper";
+import ChatBot from "@/components/chat/ChatBot";
 
 export default function page() {
     const [error, setError] = useState(null);
@@ -144,6 +146,7 @@ export default function page() {
                     )}
                 </div>
             </div>
+            <ChatBot />
         </div>
     );
 }
