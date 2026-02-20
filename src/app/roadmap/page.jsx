@@ -33,7 +33,6 @@ export default function page() {
     const [difficultyFilter, setDifficultyFilter] = useState("all");
     const [archiveFilter, setArchiveFilter] = useState("active"); // active, archived, all
     const [sortBy, setSortBy] = useState("newest");
-    const [archiveFilter, setArchiveFilter] = useState("active");
 
     // Bulk selection states
     const [selectionMode, setSelectionMode] = useState(false);

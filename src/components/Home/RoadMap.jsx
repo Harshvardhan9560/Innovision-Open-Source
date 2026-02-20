@@ -93,6 +93,7 @@ function Roadmap({ roadMap, id }) {
             <ExportCourse
               courseId={id}
               courseTitle={roadMap.courseTitle}
+            />
             <ShareCourse
               courseId={id}
               courseTitle={roadMap.courseTitle}
