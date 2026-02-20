@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock, BookOpen, Trash2, CheckCircle2 } from "lucide-react";
+import { Clock, BookOpen, CheckCircle2 } from "lucide-react";
 import { calculateEstimatedTime } from "@/lib/time-utils";
 import { Progress } from "@/components/ui/progress";
 import DeleteRoadmap from "./DeleteRoadmap";
+import DuplicateCourse from "./DuplicateCourse";
 
 const CourseCard = ({ course, onDelete }) => {
   const { id, courseTitle, courseDescription, chapterCount, difficulty, chapters } = course;
@@ -67,11 +68,17 @@ const CourseCard = ({ course, onDelete }) => {
           <CardTitle className="text-lg line-clamp-2 leading-tight">
             {courseTitle}
           </CardTitle>
-          <DeleteRoadmap
-            id={id}
-            onDelete={onDelete}
-            className="relative z-10 opacity-0 group-hover:opacity-100 transition-opacity"
-          />
+          <div className="flex items-center gap-1 relative z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+            <DuplicateCourse
+              id={id}
+              courseTitle={courseTitle}
+              onDuplicate={onDelete}
+            />
+            <DeleteRoadmap
+              id={id}
+              onDelete={onDelete}
+            />
+          </div>
         </div>
         <CardDescription className="line-clamp-2 text-sm">
           {courseDescription}
