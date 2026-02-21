@@ -11,7 +11,7 @@ import { useContext } from "react";
 import xpContext from "@/contexts/xp";
 import { ComboIndicator } from "@/components/gamification/ComboMultiplier";
 
-export default function Quiz({ task, roadmapId, chapterNumber }) {
+export default function Quiz({ task, roadmapId, chapterNumber, onCourseComplete }) {
   const [selectedOption, setSelectedOption] = useState("");
   const [isAnswered, setIsAnswered] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
@@ -26,7 +26,7 @@ export default function Quiz({ task, roadmapId, chapterNumber }) {
   const checkAnswer = async () => {
     setSubmitting(true);
     const correct = selectedOption === task.answer;
-    
+
     try {
       const res = await fetch(`/api/tasks`, {
         method: "POST",
@@ -41,8 +41,9 @@ export default function Quiz({ task, roadmapId, chapterNumber }) {
           userAnswer: selectedOption,
         }),
       });
-      
+
       if (res.ok) {
+        const data = await res.json().catch(() => ({}));
         setIsCorrect(correct);
         setIsAnswered(true);
 
@@ -64,6 +65,11 @@ export default function Quiz({ task, roadmapId, chapterNumber }) {
 
         // XP is now awarded server-side in /api/tasks
         getXp();
+
+        // Auto-trigger certificate dialog if entire course is complete
+        if (data.courseCompleted && onCourseComplete) {
+          setTimeout(() => onCourseComplete(), 800);
+        }
       } else {
         const errorData = await res.json().catch(() => ({}));
         toast.error(errorData.error || "Failed to submit task. Try again.");

@@ -10,7 +10,7 @@ import { useContext } from "react";
 import xpContext from "@/contexts/xp";
 import { ComboIndicator } from "@/components/gamification/ComboMultiplier";
 
-const FillUps = ({ task, roadmapId, chapterNumber }) => {
+const FillUps = ({ task, roadmapId, chapterNumber, onCourseComplete }) => {
   const [userAnswer, setUserAnswer] = useState("");
   const [isAnswered, setIsAnswered] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -25,7 +25,7 @@ const FillUps = ({ task, roadmapId, chapterNumber }) => {
   const checkAnswer = async () => {
     let correct = false;
     setSubmitting(true);
-    
+
     try {
       const normalizedUserAnswer = task.caseSensitive ? userAnswer.trim() : userAnswer.trim().toLowerCase();
 
@@ -48,8 +48,9 @@ const FillUps = ({ task, roadmapId, chapterNumber }) => {
           userAnswer,
         }),
       });
-      
+
       if (res.ok) {
+        const data = await res.json().catch(() => ({}));
         setIsCorrect(correct);
         setIsAnswered(true);
 
@@ -71,6 +72,11 @@ const FillUps = ({ task, roadmapId, chapterNumber }) => {
 
         // XP is now awarded server-side in /api/tasks
         getXp();
+
+        // Auto-trigger certificate dialog if entire course is complete
+        if (data.courseCompleted && onCourseComplete) {
+          setTimeout(() => onCourseComplete(), 800);
+        }
       } else {
         const errorData = await res.json().catch(() => ({}));
         toast.error(errorData.error || "Failed to submit task. Try again.");

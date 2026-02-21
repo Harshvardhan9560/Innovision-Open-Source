@@ -23,14 +23,14 @@ export default function CertificatesPage() {
   const [showDialog, setShowDialog] = useState(false);
 
   useEffect(() => {
-    if (user?.uid) {
+    if (user?.email) {
       fetchCertificates();
     }
   }, [user]);
 
   const fetchCertificates = async () => {
     try {
-      const response = await fetch(`/api/certificates/${user.uid}`);
+      const response = await fetch(`/api/certificates/${encodeURIComponent(user.email)}`);
       const data = await response.json();
 
       if (data.success) {
@@ -41,30 +41,6 @@ export default function CertificatesPage() {
       toast.error("Failed to load certificates");
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Test function to generate a sample certificate
-  const generateTestCertificate = async () => {
-    try {
-      const response = await fetch("/api/certificates/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: user.uid,
-          courseId: "test-course-id", // You'll need a real course ID
-        }),
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        toast.success("Test certificate generated!");
-        fetchCertificates();
-      } else {
-        toast.error(data.error);
-      }
-    } catch (error) {
-      toast.error("Failed to generate test certificate");
     }
   };
 

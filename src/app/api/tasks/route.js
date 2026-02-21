@@ -76,7 +76,8 @@ async function completeChapter(chapter, roadmapId, user) {
       console.error("Failed to award chapter completion XP:", xpError);
     }
 
-    if (completedChapters.length === updatedChapters.length) {
+    const allDone = completedChapters.length === updatedChapters.length;
+    if (allDone) {
       await docRef.update({
         completed: true,
       });
@@ -84,7 +85,9 @@ async function completeChapter(chapter, roadmapId, user) {
     await docRef.update({
       chapters: updatedChapters,
     });
+    return allDone;
   }
+  return false;
 }
 
 export async function POST(req) {
@@ -120,117 +123,118 @@ export async function POST(req) {
 
     const taskIndex = allTasks.findIndex((e) => e.question === task.question);
 
-    if (taskIndex !== -1) {
-      if (allTasks[taskIndex].isAnswered) {
-        return NextResponse.json({
-          message: "Task is already answered",
-        });
-      }
-      allTasks[taskIndex] = {
-        ...task,
-        isAnswered: true,
-        isCorrect: isCorrect,
-        userAnswer,
-      };
-
-      const date = new Date();
-      const month = date.getMonth();
-
-      if (isCorrect) {
-        let points = 2; // Updated: 2 XP per correct answer
-        if (task.type === "match-the-following") {
-          points = isCorrect.filter((e) => e).length * 2; // 2 XP per correct item
-        }
-
-        // Update legacy user XP
-        await adminDb
-          .collection("users")
-          .doc(session.user.email)
-          .update({
-            xp: FieldValue.increment(points),
-            [`xptrack.${month}`]: FieldValue.increment(points),
-          });
-
-        // Award XP in gamification stats
-        try {
-          const statsRef = adminDb.collection("gamification").doc(session.user.email);
-          await adminDb.runTransaction(async (transaction) => {
-            const statsDoc = await transaction.get(statsRef);
-            const xpGained = points;
-            let stats = statsDoc.exists
-              ? statsDoc.data()
-              : {
-                xp: 0,
-                level: 1,
-                streak: 1,
-                badges: [],
-                rank: 0,
-                achievements: [],
-                lastActive: new Date().toISOString(),
-              };
-
-            const newXP = (stats.xp || 0) + xpGained;
-            const newLevel = Math.floor(newXP / 500) + 1;
-
-            // Check for new badges
-            const currentBadges = stats.badges || [];
-            const newBadges = [...currentBadges];
-
-            // Perfect score badge - awarded on first correct quiz answer
-            if (!currentBadges.includes("perfect_score")) {
-              newBadges.push("perfect_score");
-            }
-
-            // Night Owl badge - studying between 12 AM - 4 AM
-            const hour = new Date().getHours();
-            if (hour >= 0 && hour < 4 && !currentBadges.includes("night_owl")) {
-              newBadges.push("night_owl");
-            }
-
-            // Early Bird badge - studying between 4 AM - 6 AM
-            if (hour >= 4 && hour < 6 && !currentBadges.includes("early_bird")) {
-              newBadges.push("early_bird");
-            }
-
-            transaction.set(
-              statsRef,
-              {
-                ...stats,
-                xp: newXP,
-                level: newLevel,
-                badges: newBadges,
-                lastActive: new Date().toISOString(),
-                achievements: [
-                  ...(stats.achievements || []),
-                  {
-                    title: "Correct Answer!",
-                    description: "You answered correctly",
-                    xp: xpGained,
-                    timestamp: new Date().toISOString(),
-                  },
-                ],
-              },
-              { merge: true }
-            );
-          });
-        } catch (xpError) {
-          console.error("Failed to award task XP:", xpError);
-        }
-      }
-
-      const completedTasks = allTasks.filter((task) => task.isAnswered);
-
-      if (completedTasks.length === allTasks.length) {
-        completeChapter(chapter, roadmap, session.user);
-      }
-    } else {
+    if (taskIndex === -1) {
       return NextResponse.json({ message: "Task not found" }, { status: 404 });
     }
 
+    if (allTasks[taskIndex].isAnswered) {
+      return NextResponse.json({ message: "Task is already answered" });
+    }
+
+    allTasks[taskIndex] = {
+      ...task,
+      isAnswered: true,
+      isCorrect: isCorrect,
+      userAnswer,
+    };
+
+    const date = new Date();
+    const month = date.getMonth();
+
+    if (isCorrect) {
+      let points = 2;
+      if (task.type === "match-the-following") {
+        points = isCorrect.filter((e) => e).length * 2;
+      }
+
+      // Update legacy user XP
+      await adminDb
+        .collection("users")
+        .doc(session.user.email)
+        .update({
+          xp: FieldValue.increment(points),
+          [`xptrack.${month}`]: FieldValue.increment(points),
+        });
+
+      // Award XP in gamification stats
+      try {
+        const statsRef = adminDb.collection("gamification").doc(session.user.email);
+        await adminDb.runTransaction(async (transaction) => {
+          const statsDoc = await transaction.get(statsRef);
+          const xpGained = points;
+          let stats = statsDoc.exists
+            ? statsDoc.data()
+            : {
+              xp: 0,
+              level: 1,
+              streak: 1,
+              badges: [],
+              rank: 0,
+              achievements: [],
+              lastActive: new Date().toISOString(),
+            };
+
+          const newXP = (stats.xp || 0) + xpGained;
+          const newLevel = Math.floor(newXP / 500) + 1;
+
+          const currentBadges = stats.badges || [];
+          const newBadges = [...currentBadges];
+
+          if (!currentBadges.includes("perfect_score")) {
+            newBadges.push("perfect_score");
+          }
+
+          const hour = new Date().getHours();
+          if (hour >= 0 && hour < 4 && !currentBadges.includes("night_owl")) {
+            newBadges.push("night_owl");
+          }
+          if (hour >= 4 && hour < 6 && !currentBadges.includes("early_bird")) {
+            newBadges.push("early_bird");
+          }
+
+          transaction.set(
+            statsRef,
+            {
+              ...stats,
+              xp: newXP,
+              level: newLevel,
+              badges: newBadges,
+              lastActive: new Date().toISOString(),
+              achievements: [
+                ...(stats.achievements || []),
+                {
+                  title: "Correct Answer!",
+                  description: "You answered correctly",
+                  xp: xpGained,
+                  timestamp: new Date().toISOString(),
+                },
+              ],
+            },
+            { merge: true }
+          );
+        });
+      } catch (xpError) {
+        console.error("Failed to award task XP:", xpError);
+      }
+    }
+
+    // Save updated tasks first
     await taskRef.set({ ...allTasks });
 
-    return NextResponse.json({ message: "Task updated successfully" }, { status: 200 });
+    // Check if all tasks in this chapter are now answered → mark chapter complete
+    const completedTasks = allTasks.filter((t) => t.isAnswered);
+    let courseCompleted = false;
+    if (completedTasks.length === allTasks.length) {
+      courseCompleted = await completeChapter(chapter, roadmap, session.user);
+    }
+
+    return NextResponse.json({
+      message: "Task updated successfully",
+      courseCompleted,
+      courseId: roadmap,
+    }, { status: 200 });
   } catch (error) {
+    console.error("Tasks API error:", error);
     return NextResponse.json({ message: "Internal server error" }, { status: 500 });
   }
 }

@@ -3,16 +3,20 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
-import { ChevronDown, ChevronUp, ChevronRight, Menu, X } from "lucide-react";
+import { ChevronDown, ChevronUp, ChevronRight, Menu, X, Award } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/auth";
+import CertificateDialog from "@/components/certificates/CertificateDialog";
 
-export default function Sidebar({ roadmap, id, isStudioCourse, courseId }) {
+export default function Sidebar({ roadmap, id, isStudioCourse, courseId, courseTitle }) {
     const [isOverviewVisible, setIsOverviewVisible] = useState(true);
     const [expandedChapters, setExpandedChapters] = useState({});
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
     const [chapters, setChapters] = useState([]);
     const [activeSubtopic, setActiveSubtopic] = useState(null);
     const [activeChapter, setActiveChapter] = useState(null);
+    const [certDialogOpen, setCertDialogOpen] = useState(false);
+    const { user } = useAuth();
     const query = useSearchParams();
     const router = useRouter();
     const pathname = usePathname();
@@ -249,8 +253,40 @@ export default function Sidebar({ roadmap, id, isStudioCourse, courseId }) {
                                 </div>
                             ))}
                     </nav>
+
+                    {/* Generate Certificate button — enabled only when course is 100% complete */}
+                    <div className="mt-4 pt-4 border-t border-border">
+                        <Button
+                            id="generate-certificate-btn"
+                            disabled={!roadmap?.completed}
+                            onClick={() => setCertDialogOpen(true)}
+                            className={cn(
+                                "w-full gap-2 transition-all",
+                                roadmap?.completed
+                                    ? "bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white"
+                                    : "opacity-60 cursor-not-allowed"
+                            )}
+                        >
+                            <Award className="h-4 w-4" />
+                            {roadmap?.completed ? "Generate Certificate" : "Complete Course to Unlock"}
+                        </Button>
+                        {!roadmap?.completed && (
+                            <p className="text-xs text-muted-foreground text-center mt-2">
+                                Complete all chapters to earn your certificate
+                            </p>
+                        )}
+                    </div>
                 </div>
             </aside>
+
+            {/* Certificate dialog */}
+            <CertificateDialog
+                open={certDialogOpen}
+                onOpenChange={setCertDialogOpen}
+                userId={user?.email}
+                courseId={id || courseId}
+                courseTitle={courseTitle || roadmap?.courseTitle || roadmap?.title || ""}
+            />
         </>
     );
 }

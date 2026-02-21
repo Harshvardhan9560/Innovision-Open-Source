@@ -9,7 +9,7 @@ import { Loader, CheckCircle, XCircle } from "lucide-react";
 import { useContext } from "react";
 import xpContext from "@/contexts/xp";
 
-export default function Match({ task, roadmapId, chapterNumber }) {
+export default function Match({ task, roadmapId, chapterNumber, onCourseComplete }) {
   const [selectedLeft, setSelectedLeft] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [selectedRight, setSelectedRight] = useState(null);
@@ -163,6 +163,7 @@ export default function Match({ task, roadmapId, chapterNumber }) {
       });
 
       if (res.ok) {
+        const data = await res.json().catch(() => ({}));
         setIsCorrect(correctnessArray);
         const correctCount = correctnessArray.filter(Boolean).length;
         setScore(correctCount);
@@ -170,6 +171,11 @@ export default function Match({ task, roadmapId, chapterNumber }) {
 
         // XP is now awarded server-side in /api/tasks
         getXp();
+
+        // Auto-trigger certificate dialog if entire course is complete
+        if (data.courseCompleted && onCourseComplete) {
+          setTimeout(() => onCourseComplete(), 800);
+        }
       } else {
         const errorData = await res.json().catch(() => ({}));
         toast.error(errorData.error || "Failed to submit task. Try again.");
