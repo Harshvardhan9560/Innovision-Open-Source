@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebase-admin";
+import { createNotification } from "@/lib/create-notification";
 
 export async function GET(request) {
   try {
@@ -11,7 +12,7 @@ export async function GET(request) {
     }
 
     const adminDb = getAdminDb();
-    
+
     if (!adminDb) {
       return NextResponse.json({
         xp: 0,
@@ -83,9 +84,9 @@ export async function POST(request) {
     const { userId, action, value } = await request.json();
 
     const adminDb = getAdminDb();
-    
+
     if (!adminDb) {
-      return NextResponse.json({ 
+      return NextResponse.json({
         error: "Firebase not configured",
         _warning: "Gamification features require Firebase configuration"
       }, { status: 503 });
@@ -106,7 +107,7 @@ export async function POST(request) {
       help_student: 15,
       view_course: 10,
       complete_lesson: 5,
-      correct_answer: 2, 
+      correct_answer: 2,
       generate_course: 10,
     };
 
@@ -167,6 +168,39 @@ export async function POST(request) {
 
     await userRef.update(updates);
 
+    // Fire notifications for new badges and level-ups
+    if (adminDb && userId) {
+      if (newBadges.length > 0) {
+        for (const badge of newBadges) {
+          createNotification(adminDb, {
+            userId,
+            title: "New Badge Unlocked!",
+            body: `You earned the "${badge.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}" badge.`,
+            type: "achievement",
+            link: "/gamification",
+          }).catch(() => { });
+        }
+      }
+      if (newLevel > stats.level) {
+        createNotification(adminDb, {
+          userId,
+          title: `Level Up! You're now Level ${newLevel}`,
+          body: `Awesome work! You've reached Level ${newLevel} with ${newXP} XP.`,
+          type: "achievement",
+          link: "/gamification",
+        }).catch(() => { });
+      }
+      if (action === "generate_course") {
+        createNotification(adminDb, {
+          userId,
+          title: "New AI Course Created!",
+          body: "Your AI-generated course is ready. Start learning!",
+          type: "progress",
+          link: "/roadmap",
+        }).catch(() => { });
+      }
+    }
+
     return NextResponse.json({
       success: true,
       xpGained,
@@ -212,7 +246,7 @@ function checkBadges(stats, action) {
   if (coursesCompleted >= 10 && !currentBadges.includes("scholar")) {
     badges.push("scholar");
   }
-  const lessonsCompleted = (stats.achievements || []).filter(a => 
+  const lessonsCompleted = (stats.achievements || []).filter(a =>
     a.title === "Lesson Complete!" || a.title === "Chapter Complete!"
   ).length;
   if (lessonsCompleted >= 100 && !currentBadges.includes("bookworm")) {
