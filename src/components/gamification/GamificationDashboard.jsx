@@ -117,7 +117,7 @@ export default function GamificationDashboard({ userId }) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-500">#{stats.rank || "N/A"}</div>
+            <div className="text-2xl font-bold text-blue-500">{stats.rank ? `#${stats.rank}` : "Unranked"}</div>
             <p className="text-xs text-muted-foreground">global</p>
           </CardContent>
         </Card>
@@ -164,7 +164,7 @@ export default function GamificationDashboard({ userId }) {
           <CardTitle className="text-sm">Badge Collection</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+          <div className="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12 gap-2">
             {BADGES.map((badge) => {
               const earned = stats.badges?.includes(badge.id);
               const IconComponent = Icons[badge.icon];

@@ -27,7 +27,7 @@ export default function GamificationPage() {
       <PageBackground />
       <GridPattern opacity={0.02} />
 
-      <div className="max-w-4xl mx-auto relative z-10">
+      <div className="max-w-7xl mx-auto relative z-10">
         <PageHeader
           title="Your Progress"
           description="Track achievements, compete, and level up!"
@@ -58,19 +58,19 @@ export default function GamificationPage() {
             </TabsList>
 
             <TabsContent value="overview" className="space-y-0">
-              <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                 <div className="lg:col-span-3">
                   <GamificationDashboard userId={user.email} />
                 </div>
 
-                <div className="lg:col-span-1">
+                <div className="lg:col-span-2">
                   <Leaderboard currentUserId={user.email} />
                 </div>
               </div>
             </TabsContent>
 
             <TabsContent value="analytics" className="space-y-0">
-              <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                 <div className="lg:col-span-2">
                   <XPChart userId={user.email} />
                 </div>
@@ -81,11 +81,11 @@ export default function GamificationPage() {
             </TabsContent>
 
             <TabsContent value="challenges" className="space-y-0">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div className="lg:col-span-2">
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                <div className="lg:col-span-3">
                   <DailyChallenges userId={user.email} />
                 </div>
-                <div className="lg:col-span-1">
+                <div className="lg:col-span-2">
                   <Leaderboard currentUserId={user.email} />
                 </div>
               </div>

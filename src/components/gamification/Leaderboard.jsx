@@ -174,7 +174,7 @@ export default function Leaderboard({ currentUserId }) {
               `}
             >
               {/* Rank */}
-              <div className="w-10 flex flex-col items-center">
+              <div className="w-10 shrink-0 flex flex-col items-center">
                 {getRankIcon(rank)}
                 {rankChange}
               </div>
@@ -196,12 +196,12 @@ export default function Leaderboard({ currentUserId }) {
 
               {/* User info */}
               <div className="flex-1 min-w-0">
-                <div className="font-semibold flex items-center gap-2 truncate">
-                  <span className={isCurrentUser ? "text-blue-700 dark:text-blue-300" : ""}>
+                <div className="font-semibold flex items-center gap-2 min-w-0">
+                  <span className={`truncate text-base ${isCurrentUser ? "text-blue-700 dark:text-blue-300" : ""}`}>
                     {user.name || "Anonymous"}
                   </span>
                   {isCurrentUser && (
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 text-xs">
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 text-[11px] h-5 px-1.5 shrink-0">
                       You
                     </Badge>
                   )}
@@ -214,11 +214,11 @@ export default function Leaderboard({ currentUserId }) {
               </div>
 
               {/* XP */}
-              <div className="text-right">
-                <div className={`font-bold text-lg ${rank === 1 ? "text-yellow-600 dark:text-yellow-400" : ""}`}>
+              <div className="text-right shrink-0">
+                <div className={`font-bold text-lg sm:text-xl ${rank === 1 ? "text-yellow-600 dark:text-yellow-400" : ""}`}>
                   {(user.xp || 0).toLocaleString()}
                 </div>
-                <div className="text-xs text-muted-foreground">XP</div>
+                <div className="text-xs text-muted-foreground leading-none">XP</div>
               </div>
             </div>
           );

@@ -12,22 +12,23 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import RecommendedCourses from "@/components/RecommendedCourses";
 
 export default function page() {
     const [error, setError] = useState(null);
     const [roadmaps, setRoadmaps] = useState([]);
     const [loading, setLoading] = useState(true);
-    
+
     // Filter states
     const [searchQuery, setSearchQuery] = useState("");
     const [difficultyFilter, setDifficultyFilter] = useState("all");
@@ -187,8 +188,7 @@ export default function page() {
 
             if (response.ok) {
                 toast.success(
-                    `Successfully ${action}d ${data.processed} course${data.processed > 1 ? 's' : ''}${
-                        data.failed > 0 ? `, ${data.failed} failed` : ''
+                    `Successfully ${action}d ${data.processed} course${data.processed > 1 ? 's' : ''}${data.failed > 0 ? `, ${data.failed} failed` : ''
                     }`
                 );
                 setSelectedCourses([]);
@@ -234,6 +234,8 @@ export default function page() {
                     iconColor="text-blue-500"
                     badge={<><Sparkles className="h-3.5 w-3.5" /> My Learning</>}
                 />
+
+                {!loading && !error && <RecommendedCourses query={searchQuery} />}
 
                 {/* Search and Filter Section */}
                 {!loading && !error && completedCourses.length > 0 && (

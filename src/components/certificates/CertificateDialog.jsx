@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
 import {
   Dialog,
   DialogContent,
@@ -9,7 +10,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Award, Loader2 } from "lucide-react";
+import { Award, Loader2, ExternalLink } from "lucide-react";
+import Link from "next/link";
+
 import { toast } from "sonner";
 import CertificateGenerator from "./CertificateGenerator";
 import confetti from "canvas-confetti";
@@ -17,6 +20,15 @@ import confetti from "canvas-confetti";
 const CertificateDialog = ({ open, onOpenChange, userId, courseId, courseTitle }) => {
   const [certificate, setCertificate] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  // Fire confetti burst when dialog auto-opens after course completion
+  useEffect(() => {
+    if (open) {
+      confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
+      setTimeout(() => confetti({ particleCount: 80, spread: 60, origin: { y: 0.4, x: 0.3 } }), 300);
+      setTimeout(() => confetti({ particleCount: 80, spread: 60, origin: { y: 0.4, x: 0.7 } }), 600);
+    }
+  }, [open]);
 
   const generateCertificate = async () => {
     setLoading(true);
@@ -32,7 +44,7 @@ const CertificateDialog = ({ open, onOpenChange, userId, courseId, courseTitle }
       if (data.success) {
         setCertificate(data.certificate);
         toast.success("Certificate generated successfully!");
-        
+
         // Trigger confetti
         confetti({
           particleCount: 100,
@@ -97,9 +109,27 @@ const CertificateDialog = ({ open, onOpenChange, userId, courseId, courseTitle }
                 )}
               </Button>
             </div>
+            <Link
+              href="/profile/certificates"
+              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors mt-2"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              View All Certificates
+            </Link>
           </div>
         ) : (
-          <CertificateGenerator certificateData={certificate} />
+          <>
+            <CertificateGenerator certificateData={certificate} />
+            <div className="flex justify-center mt-4">
+              <Link
+                href="/profile/certificates"
+                className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                View All Certificates
+              </Link>
+            </div>
+          </>
         )}
       </DialogContent>
     </Dialog>
