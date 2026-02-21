@@ -2,8 +2,6 @@
 
 ## 📊 Overall Progress: 11/13 Issues (85% Complete)
 
----
-
 ## ✅ COMPLETED & PUSHED (11 Issues)
 
 ### Phase 1: Frontend Only (5/5) ✅
@@ -15,12 +13,16 @@
 - **APIs**: None needed
 - **Features**: Search by title, filter by difficulty, sort by date/title, persistent filters
 
+---
+
 #### #95 - Course Progress Percentage
 - **Status**: ✅ MERGED
 - **Branch**: `feature/issue-95-progress-percentage`
 - **PR**: Merged to main
 - **APIs**: None needed
 - **Features**: Progress bar, percentage display, completed chapter count
+
+---
 
 #### #97 - Dark Mode for Code Snippets
 - **Status**: ✅ MERGED
@@ -29,12 +31,16 @@
 - **APIs**: None needed
 - **Features**: Syntax highlighting with dark theme support
 
+---
+
 #### #98 - Estimated Time to Complete
 - **Status**: ✅ MERGED
 - **Branch**: `feature/issue-98-estimated-time`
 - **PR**: Merged to main
 - **APIs**: None needed
 - **Features**: Time calculation based on chapters and difficulty
+
+---
 
 #### #102 - Improve Loading States
 - **Status**: ✅ MERGED
@@ -52,14 +58,18 @@
 - **Branch**: `feature/issue-99-course-duplication`
 - **PR**: #117 (Open)
 - **APIs Created**:
+
   - `POST /api/roadmap/duplicate` - Duplicate course with all chapters
 - **Features**: Duplicate button, copy all chapters, rename with "(Copy)" suffix
+
+---
 
 #### #104 - Course Archiving
 - **Status**: ✅ PUSHED (PR #118)
 - **Branch**: `feature/issue-104-course-archiving`
 - **PR**: #118 (Open)
 - **APIs Created**:
+
   - `PATCH /api/roadmap/[id]/archive` - Archive/unarchive course
   - Updated `GET /api/roadmap/all` - Return archived field
 - **Features**: Archive button, archive filter (Active/Archived/All), confirmation dialog
@@ -72,25 +82,32 @@
 - **Status**: ✅ PUSHED (Ready for PR)
 - **Branch**: `feature/issue-96-course-sharing`
 - **APIs Created**:
+
   - `POST /api/courses/public/[id]` - Make course public/private
   - `GET /api/courses/public/[id]` - Fetch public course
   - `POST /api/analytics/share` - Track share analytics
 - **Features**: Share button, public/private toggle, social media sharing, QR code, public view page
 - **Known Issue**: "Failed to update course" when toggling public (needs debugging)
 
+---
+
 #### #100 - Course Export (PDF)
 - **Status**: ✅ PUSHED (Ready for PR)
 - **Branch**: `feature/issue-100-course-export`
 - **APIs Created**:
+
   - `GET /api/roadmap/[id]` - Fetch single course
   - `POST /api/roadmap/export` - Legacy support for markdown/json
 - **Features**: Export button, PDF generation with jspdf, full content export, table of contents
 - **Known Issue**: Subtopic content structure handling needs refinement
 
+---
+
 #### #103 - Bulk Actions for Courses
 - **Status**: ✅ PUSHED (Ready for PR)
 - **Branch**: `feature/issue-103-bulk-actions`
 - **APIs Created**:
+
   - `POST /api/roadmap/bulk` - Bulk delete/archive/unarchive
 - **Features**: Selection mode, checkboxes, select all, bulk delete/archive, confirmation dialogs, archive filter integration
 
@@ -103,6 +120,7 @@
 - **Branch**: `feature/issue-101-course-certificates`
 - **PR**: #119 Merged
 - **APIs Created**:
+
   - `POST /api/certificates/generate` - Generate certificate
   - `GET /api/certificates/[userId]` - Get user certificates
   - `GET /api/certificates/verify/[certificateId]` - Verify certificate
@@ -118,6 +136,7 @@
 - **Difficulty**: Medium-Hard
 - **Estimated Time**: 8 hours
 - **APIs Needed**:
+
   - `POST /api/reviews` - Submit review
   - `GET /api/reviews/[courseId]` - Get course reviews
   - `PATCH /api/reviews/[reviewId]` - Update review
@@ -133,11 +152,14 @@
   - Average rating display
   - Review sorting (newest, highest rated, most helpful)
 
+---
+
 ### #106 - Course Recommendations (AI)
 - **Status**: ❌ NOT STARTED
 - **Difficulty**: Hard
 - **Estimated Time**: 6 hours
 - **APIs Needed**:
+
   - `GET /api/recommendations` - Get AI recommendations
   - `POST /api/recommendations/feedback` - Submit feedback
 - **Features Needed**:
@@ -156,11 +178,15 @@
 - ✅ Pushed (PR Open): 4 issues
 - ❌ Not Started: 2 issues
 
+---
+
 ### By Difficulty
 - Easy (Frontend Only): 5/5 ✅
 - Medium (Simple APIs): 2/2 ✅
 - Medium (Complex APIs): 3/3 ✅
 - Hard (AI/Complex): 1/3 ✅
+
+---
 
 ### API Endpoints Created
 - Total: 15 endpoints
@@ -182,10 +208,14 @@
    - User history analysis
    - Recommendation algorithm
 
+---
+
 ### Option 2: Fix Known Issues
 1. **#96 - Course Sharing**: Debug "Failed to update course" error
 2. **#100 - Course Export**: Refine subtopic content structure handling
 3. **#101 - Certificates**: Consider uid vs email consistency
+
+---
 
 ### Option 3: Create PRs for Pushed Branches
 - Create PR for #96 (Course Sharing)

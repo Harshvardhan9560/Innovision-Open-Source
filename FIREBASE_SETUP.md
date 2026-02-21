@@ -2,10 +2,14 @@
 
 This guide will help you set up Firebase for the Innovision project.
 
+---
+
 ## Prerequisites
 
 - A Google account
 - Node.js installed on your machine
+
+---
 
 ## Step 1: Create a Firebase Project
 
@@ -17,6 +21,8 @@ This guide will help you set up Firebase for the Innovision project.
 6. Click **"Create project"**
 7. Wait for the project to be created, then click **"Continue"**
 
+---
+
 ## Step 2: Enable Required Services
 
 ### Enable Firestore Database
@@ -25,9 +31,13 @@ This guide will help you set up Firebase for the Innovision project.
 2. Click **"Create database"**
 3. Select **"Start in production mode"** → **Next**
 4. Choose a location close to your users
+
    - ⚠️ **Note**: You cannot change this location later!
+
 5. Click **"Enable"**
 6. Wait for the database to be created (30-60 seconds)
+
+---
 
 ### Enable Authentication
 
@@ -56,6 +66,8 @@ This guide will help you set up Firebase for the Innovision project.
    - Paste them back into Firebase
    - Click **"Save"**
 
+---
+
 ### Enable Cloud Firestore API
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
@@ -65,10 +77,14 @@ This guide will help you set up Firebase for the Innovision project.
 5. Click **"Enable"**
 6. Wait 5-10 minutes for the API to propagate
 
+---
+
 ## Step 3: Set Up Firestore Security Rules
 
 1. Go to **Firestore Database** → **Rules** tab
 2. Replace the default rules with the following:
+
+---
 
 **For Development (allows all access):**
 ```javascript
@@ -81,6 +97,7 @@ service cloud.firestore {
   }
 }
 ```
+---
 
 **For Production (secure rules):**
 ```javascript
@@ -110,8 +127,11 @@ service cloud.firestore {
   }
 }
 ```
+---
 
 3. Click **"Publish"**
+
+---
 
 ## Step 4: Get Firebase Configuration
 
@@ -120,10 +140,12 @@ service cloud.firestore {
 1. In Firebase Console, click the **gear icon** (⚙️) → **Project settings**
 2. Scroll down to **"Your apps"** section
 3. If you don't have a web app yet:
+
    - Click **"Add app"** → Choose **Web** (`</>` icon)
    - Give it a nickname (e.g., "Innovision Web")
    - **Don't check** "Also set up Firebase Hosting" (unless you want it)
    - Click **"Register app"**
+
 4. Copy the Firebase configuration values:
    ```javascript
    const firebaseConfig = {
@@ -137,6 +159,8 @@ service cloud.firestore {
    };
    ```
 
+---
+
 ### Server-Side Configuration (Firebase Admin)
 
 1. In Firebase Console, go to **Project settings** → **Service accounts** tab
@@ -144,9 +168,12 @@ service cloud.firestore {
 3. Click **"Generate key"** (a JSON file will download)
 4. **Keep this file secure! Don't commit it to Git!**
 5. You'll need these values from the JSON file:
+
    - `project_id`
    - `client_email`
    - `private_key`
+
+---
 
 ## Step 5: Configure Environment Variables
 
@@ -175,11 +202,14 @@ FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY_HERE\n-----E
 # Gemini API Key (for AI features)
 GEMINI_API_KEY=your_gemini_api_key_here
 ```
+---
 
 **Important Notes:**
 - The `FIREBASE_PRIVATE_KEY` must include the quotes and `\n` characters
 - Never commit your `.env` file to Git (it's in `.gitignore`)
 - For production, use environment variables in your hosting platform
+
+---
 
 ## Step 6: Install Dependencies and Run
 
@@ -193,6 +223,8 @@ npm run dev
 
 The app should now be running at `http://localhost:3000`
 
+---
+
 ## Troubleshooting
 
 ### "SERVICE_DISABLED" Error
@@ -200,20 +232,28 @@ The app should now be running at `http://localhost:3000`
 - Wait 5-10 minutes for the API to propagate
 - Check [Google Cloud Console](https://console.cloud.google.com/) to verify the API is enabled
 
+---
+
 ### "Missing or insufficient permissions" Error
 - Check your Firestore security rules
 - For development, use the permissive rules shown above
 - Make sure the rules are published
+
+---
 
 ### Authentication Not Working
 - Verify authentication providers are enabled in Firebase Console
 - Check that your redirect URLs are correctly configured
 - For GitHub OAuth, ensure the callback URL matches exactly
 
+---
+
 ### Course Content Not Loading
 - Make sure Firestore database is created (not just API enabled)
 - Check that security rules allow reading from `published_courses` collection
 - Verify your Firebase Admin credentials are correct
+
+---
 
 ## Next Steps
 
@@ -221,6 +261,8 @@ The app should now be running at `http://localhost:3000`
 - Publish courses to make them available in the browse section
 - Set up proper security rules before deploying to production
 - Consider setting up Firebase Hosting for deployment
+
+---
 
 ## Security Reminder
 
