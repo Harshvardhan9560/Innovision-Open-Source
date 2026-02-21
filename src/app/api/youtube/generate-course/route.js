@@ -196,6 +196,20 @@ IMPORTANT RULES:
         enhancedCourseData.id = finalCourseId;
         savedToDb = true;
         console.log("Course saved to Firebase with ID:", docRef.id);
+
+
+        try {
+          const { createNotification } = await import("@/lib/create-notification");
+          await createNotification(adminDb, {
+            userId: session.user.email,
+            title: "New Course Ready!",
+            body: `Your YouTube course "${courseData.title || title}" has been created and is ready to learn.`,
+            type: "progress",
+            link: `/youtube-course/${finalCourseId}`,
+          });
+        } catch (notifErr) {
+          console.warn("Notification creation failed:", notifErr.message);
+        }
       }
     } catch (dbError) {
       console.warn("Could not save to Firebase:", dbError.message);
