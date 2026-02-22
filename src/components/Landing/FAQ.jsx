@@ -70,6 +70,11 @@ const FAQItem = ({ question, answer, isOpen, onClick }) => (
 
 const FAQ = () => {
   const [openIndex, setOpenIndex] = useState(null);
+  const [visibleCount, setVisibleCount] = useState(5);
+
+  const handleLoadMore = () => {
+    setVisibleCount(prev => Math.min(prev + 5, faqs.length));
+  };
 
   return (
     <section id="faq" className="relative w-screen py-20 md:py-32 bg-background">
@@ -90,7 +95,7 @@ const FAQ = () => {
         </ScrollReveal>
 
         <div className="mx-auto max-w-3xl space-y-4">
-          {faqs.map((faq, index) => (
+          {faqs.slice(0, visibleCount).map((faq, index) => (
             <ScrollReveal key={index} delay={index * 100} direction="up">
               <FAQItem
                 question={faq.question}
@@ -101,6 +106,16 @@ const FAQ = () => {
             </ScrollReveal>
           ))}
         </div>
+        {visibleCount < faqs.length && (
+          <div className="flex justify-center mt-8">
+            <button
+              onClick={handleLoadMore}
+              className="px-6 py-3 bg-blue-500 text-white rounded-full font-light hover:bg-blue-600 transition-colors"
+            >
+              Load More
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );
